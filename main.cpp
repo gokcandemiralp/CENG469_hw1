@@ -27,8 +27,6 @@ int gVertexDataSizeInBytes, gNormalDataSizeInBytes;
 
 bool ParseObj(const string& fileName){
 	fstream myfile;
-
-	// Open the input 
 	myfile.open(fileName.c_str(), std::ios::in);
 
 	if (myfile.is_open()){
@@ -72,8 +70,7 @@ bool ParseObj(const string& fileName){
 						vIndex[1] == nIndex[1] &&
 						vIndex[2] == nIndex[2]); // a limitation for now
 
-					// make indices start from 0
-					for (int c = 0; c < 3; ++c){
+					for (int c = 0; c < 3; ++c){ // make indices start from 0
 						vIndex[c] -= 1;
 						nIndex[c] -= 1;
 						tIndex[c] -= 1;
@@ -96,7 +93,6 @@ bool ParseObj(const string& fileName){
 
 bool ReadDataFromFile(const string& fileName,string& data){
 	fstream myfile;
-	// Open the input 
 	myfile.open(fileName.c_str(), std::ios::in);
 
 	if (myfile.is_open()){
@@ -131,10 +127,6 @@ GLuint createVS(const char* shaderName){
 	glShaderSource(vs, 1, &shader, &length);
 	glCompileShader(vs);
 
-	char output[1024] = { 0 };
-	glGetShaderInfoLog(vs, 1024, &length, output);
-	printf("VS compile log: %s\n", output);
-
 	return vs;
 }
 
@@ -153,20 +145,12 @@ GLuint createFS(const char* shaderName){
 	glShaderSource(fs, 1, &shader, &length);
 	glCompileShader(fs);
 
-	char output[1024] = { 0 };
-	glGetShaderInfoLog(fs, 1024, &length, output);
-	printf("FS compile log: %s\n", output);
-
 	return fs;
 }
 
 void initShaders(){
-	// Create the programs
-
 	gProgram[0] = glCreateProgram();
 	gProgram[1] = glCreateProgram();
-
-	// Create the shaders for both programs
 
 	GLuint vs1 = createVS("vert.glsl");
 	GLuint fs1 = createFS("frag.glsl");
@@ -174,15 +158,11 @@ void initShaders(){
 	GLuint vs2 = createVS("vert2.glsl");
 	GLuint fs2 = createFS("frag2.glsl");
 
-	// Attach the shaders to the programs
-
 	glAttachShader(gProgram[0], vs1);
 	glAttachShader(gProgram[0], fs1);
 
 	glAttachShader(gProgram[1], vs2);
 	glAttachShader(gProgram[1], fs2);
-
-	// Link the programs
 
 	glLinkProgram(gProgram[0]);
 	GLint status;
@@ -200,8 +180,6 @@ void initShaders(){
 		cout << "Program link failed" << endl;
 		exit(-1);
 	}
-
-	// Get the locations of the uniform variables from both programs
 
 	for (int i = 0; i < 2; ++i){
 		modelingMatrixLoc[i] = glGetUniformLocation(gProgram[i], "modelingMatrix");
@@ -254,13 +232,6 @@ void initVBO(){
 		maxZ = std::max(maxZ, gVertices[i].z);
 	}
 
-	std::cout << "minX = " << minX << std::endl;
-	std::cout << "maxX = " << maxX << std::endl;
-	std::cout << "minY = " << minY << std::endl;
-	std::cout << "maxY = " << maxY << std::endl;
-	std::cout << "minZ = " << minZ << std::endl;
-	std::cout << "maxZ = " << maxZ << std::endl;
-
 	for (int i = 0; i < gNormals.size(); ++i){
 		normalData[3 * i] = gNormals[i].x;
 		normalData[3 * i + 1] = gNormals[i].y;
@@ -289,9 +260,6 @@ void initVBO(){
 }
 
 void init(){
-	ParseObj("armadillo.obj");
-	//ParseObj("bunny.obj");
-
 	glEnable(GL_DEPTH_TEST);
 	initShaders();
 	initVBO();
@@ -381,6 +349,9 @@ void mainLoop(GLFWwindow* window)
 
 int main(int argc, char** argv)   // Create Main Function For Bringing It All Together
 {
+	if(argc != 2){return 1;}
+	ParseObj(argv[1]);
+
 	GLFWwindow* window;
 	if (!glfwInit()){
 		exit(-1);
