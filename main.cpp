@@ -1,13 +1,15 @@
 #include "main.h" 
 #define BUFFER_OFFSET(i) ((char*)NULL + (i))
 
-GLuint gProgram[2];
-int gWidth, gHeight;
 
-GLint modelingMatrixLoc[2];
-GLint viewingMatrixLoc[2];
-GLint projectionMatrixLoc[2];
-GLint eyePosLoc[2];
+GLuint gProgram[1];
+int gWidth, gHeight;
+int programCount = 1;
+
+GLint modelingMatrixLoc[1];
+GLint viewingMatrixLoc[1];
+GLint projectionMatrixLoc[1];
+GLint eyePosLoc[1];
 
 glm::mat4 projectionMatrix;
 glm::mat4 viewingMatrix;
@@ -149,23 +151,14 @@ GLuint createFS(const char* shaderName){
 }
 
 void initShaders(){
-	gProgram[0] = glCreateProgram();
-	gProgram[1] = glCreateProgram();
+	GLint status;
 
+	gProgram[0] = glCreateProgram();
 	GLuint vs1 = createVS("vert.glsl");
 	GLuint fs1 = createFS("frag.glsl");
-
-	GLuint vs2 = createVS("vert2.glsl");
-	GLuint fs2 = createFS("frag2.glsl");
-
 	glAttachShader(gProgram[0], vs1);
 	glAttachShader(gProgram[0], fs1);
-
-	glAttachShader(gProgram[1], vs2);
-	glAttachShader(gProgram[1], fs2);
-
 	glLinkProgram(gProgram[0]);
-	GLint status;
 	glGetProgramiv(gProgram[0], GL_LINK_STATUS, &status);
 
 	if (status != GL_TRUE){
@@ -173,15 +166,7 @@ void initShaders(){
 		exit(-1);
 	}
 
-	glLinkProgram(gProgram[1]);
-	glGetProgramiv(gProgram[1], GL_LINK_STATUS, &status);
-
-	if (status != GL_TRUE){
-		cout << "Program link failed" << endl;
-		exit(-1);
-	}
-
-	for (int i = 0; i < 2; ++i){
+	for (int i = 0; i < 1; ++i){
 		modelingMatrixLoc[i] = glGetUniformLocation(gProgram[i], "modelingMatrix");
 		viewingMatrixLoc[i] = glGetUniformLocation(gProgram[i], "viewingMatrix");
 		projectionMatrixLoc[i] = glGetUniformLocation(gProgram[i], "projectionMatrix");
@@ -356,16 +341,11 @@ int main(int argc, char** argv)   // Create Main Function For Bringing It All To
 	if (!glfwInit()){
 		exit(-1);
 	}
-
-	//glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-	//glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
-	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-	int width = 640, height = 480;
+	int width = 640, height = 640;
 	window = glfwCreateWindow(width, height, "Simple Example", NULL, NULL);
 
 	if (!window){

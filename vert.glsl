@@ -7,12 +7,13 @@
 // here for simplicity.
 
 vec3 I = vec3(1, 1, 1);          // point light intensity
-vec3 Iamb = vec3(0.8, 0.8, 0.8); // ambient light intensity
-vec3 kd = vec3(1, 0.2, 0.2);     // diffuse reflectance coefficient
 vec3 ka = vec3(0.3, 0.3, 0.3);   // ambient reflectance coefficient
+vec3 kd = vec3(0.8, 0.8, 0.8);   // diffuse reflectance coefficient
 vec3 ks = vec3(0.8, 0.8, 0.8);   // specular reflectance coefficient
-vec3 lightPos = vec3(5, 5, 5);   // light position in world coordinates
+vec3 Iamb = vec3(0.8, 0.8, 0.8); // ambient light intensity
+int phongExponent = 400; 
 
+vec3 lightPos = vec3(5, 5, 5);   // light position in world coordinates [change this]
 uniform mat4 modelingMatrix;
 uniform mat4 viewingMatrix;
 uniform mat4 projectionMatrix;
@@ -47,7 +48,7 @@ void main(void)
 	float NdotH = dot(N, H); // for specular component
 
 	vec3 diffuseColor = I * kd * max(0, NdotL);
-	vec3 specularColor = I * ks * pow(max(0, NdotH), 100);
+	vec3 specularColor = I * ks * pow(max(0, NdotH), phongExponent);
 	vec3 ambientColor = Iamb * ka;
 
 	// We update the front color of the vertex. This value will be sent
