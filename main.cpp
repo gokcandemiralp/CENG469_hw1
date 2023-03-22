@@ -27,6 +27,23 @@ GLuint gVertexAttribBuffer, gIndexBuffer;
 GLint gInVertexLoc, gInNormalLoc;
 int gVertexDataSizeInBytes, gNormalDataSizeInBytes;
 
+bool ParseSurface(const string& fileName){
+	fstream myfile;
+	myfile.open(fileName.c_str(), std::ios::in);
+
+	if (myfile.is_open()){
+		string curLine;
+		while (getline(myfile, curLine)){
+			std::cout << curLine << "\n";
+		}
+		myfile.close();
+	}
+	else{
+		return false;
+	}
+	return true;
+}
+
 bool ParseObj(const string& fileName){
 	fstream myfile;
 	myfile.open(fileName.c_str(), std::ios::in);
@@ -272,10 +289,7 @@ void display(){
 
 	// Compute the modeling matrix
 	glm::mat4 matT = glm::translate(glm::mat4(1.0), glm::vec3(-0.1f, -0.2f, -7.0f));
-	glm::mat4 matRx = glm::rotate<float>(glm::mat4(1.0), (0. / 180.) * M_PI, glm::vec3(1.0, 0.0, 0.0));
-	glm::mat4 matRy = glm::rotate<float>(glm::mat4(1.0), (-180. / 180.) * M_PI, glm::vec3(0.0, 1.0, 0.0));
-	glm::mat4 matRz = glm::rotate<float>(glm::mat4(1.0), angleRad, glm::vec3(0.0, 0.0, 1.0));
-	modelingMatrix = matT * matRz * matRy * matRx;
+	modelingMatrix = matT;
 
 	// Set the active program and the values of its uniform variables
 	glUseProgram(gProgram[activeProgramIndex]);
@@ -335,7 +349,8 @@ void mainLoop(GLFWwindow* window)
 int main(int argc, char** argv)   // Create Main Function For Bringing It All Together
 {
 	if(argc != 2){return 1;}
-	ParseObj(argv[1]);
+	ParseSurface(argv[1]);
+	ParseObj("bunny.obj");
 
 	GLFWwindow* window;
 	if (!glfwInit()){
