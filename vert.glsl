@@ -36,8 +36,8 @@ void main(void){
 	vec3 lightPos, I, L, H;
 	float NdotL;
 	float NdotH;
-	vec3 diffuseColor;
-	vec3 specularColor;
+	vec3 diffuseColor  = vec3(0,0,0);
+	vec3 specularColor = vec3(0,0,0);
 	for(int i = 0 ; i<lightCount ; ++i){
 		lightPos = pointLights[i].position; // light position in world coordinates
 		I = pointLights[i].color;   		// point light intensity
@@ -45,8 +45,8 @@ void main(void){
 		H = normalize(L + V);
 		NdotL = dot(N, L); // for diffuse component
 		NdotH = dot(N, H); // for specular component
-		diffuseColor = I * kd * max(0, NdotL);
-		specularColor = I * ks * pow(max(0, NdotH), phongExponent);
+		diffuseColor = (I * kd * max(0, NdotL)) + diffuseColor;
+		specularColor = (I * ks * pow(max(0, NdotH), phongExponent)) + specularColor ;
 	}
 
 	vec3 ambientColor = Iamb * ka;

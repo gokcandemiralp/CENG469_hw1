@@ -16,8 +16,6 @@ glm::mat4 viewingMatrix;
 glm::mat4 modelingMatrix;
 glm::vec3 eyePos(0, 0, 0);
 
-int activeProgramIndex = 0;
-
 vector<Vertex> gVertices;
 vector<Texture> gTextures;
 vector<Normal> gNormals;
@@ -30,6 +28,8 @@ int gVertexDataSizeInBytes, gNormalDataSizeInBytes;
 GLint lightCount;
 GLint cPointX, cPointY;
 PointLight *pointLights;
+float rotationAngle = -30;
+float coordMultiplier = 0.8;
 
 bool ParseSurface(const string& fileName){
 	fstream myfile;
@@ -309,7 +309,10 @@ void display(){
 
 	// Compute the modeling matrix
 	glm::mat4 matT = glm::translate(glm::mat4(1.0), glm::vec3(-0.1f, -0.2f, -7.0f));
-	modelingMatrix = matT;
+	glm::mat4 matR = glm::rotate(glm::mat4(1.f), glm::radians(rotationAngle), glm::vec3(0, 1, 0));
+	glm::mat4 matS = glm::scale(glm::mat4(1.f), glm::vec3(coordMultiplier,coordMultiplier,coordMultiplier));
+
+	modelingMatrix = matT * matS * matR;
 
 	// Set the active program and the values of its uniform variables
 	glUseProgram(gProgram);
@@ -322,9 +325,9 @@ void display(){
 
 	for(int lightIndex = 0; lightIndex < lightCount ; ++lightIndex){
 		tmp_str = "pointLights[" + std::to_string(lightIndex) + "].position";
-		glUniform3fv(glGetUniformLocation(gProgram, tmp_str.c_str()), 1, glm::value_ptr(pointLights[0].position));
+		glUniform3fv(glGetUniformLocation(gProgram, tmp_str.c_str()), 1, glm::value_ptr(pointLights[lightIndex].position));
 		tmp_str = "pointLights[" + std::to_string(lightIndex) + "].color";
-		glUniform3fv(glGetUniformLocation(gProgram, tmp_str.c_str()), 1, glm::value_ptr(pointLights[0].color));
+		glUniform3fv(glGetUniformLocation(gProgram, tmp_str.c_str()), 1, glm::value_ptr(pointLights[lightIndex].color));
 	}
 	drawModel();
 }
@@ -346,19 +349,26 @@ void reshape(GLFWwindow* window, int w, int h){
 
 void keyboard(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	if (key == GLFW_KEY_Q && action == GLFW_PRESS){
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS){
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
 	}
-	else if (key == GLFW_KEY_G && action == GLFW_PRESS){
-		//glShadeModel(GL_SMOOTH);
-		activeProgramIndex = 0;
+	else if (key == GLFW_KEY_W && action == GLFW_PRESS){
+		;
 	}
-	else if (key == GLFW_KEY_P && action == GLFW_PRESS){
-		//glShadeModel(GL_SMOOTH);
-		activeProgramIndex = 1;
+	else if (key == GLFW_KEY_S && action == GLFW_PRESS){
+		;
+	}
+	else if (key == GLFW_KEY_E && action == GLFW_PRESS){
+		coordMultiplier += 0.1;
+	}
+	else if (key == GLFW_KEY_D && action == GLFW_PRESS){
+		coordMultiplier -= 0.1;
+	}
+	else if (key == GLFW_KEY_R && action == GLFW_PRESS){
+		rotationAngle += 10;;
 	}
 	else if (key == GLFW_KEY_F && action == GLFW_PRESS){
-		//glShadeModel(GL_FLAT);
+		rotationAngle -= 10;
 	}
 }
 
