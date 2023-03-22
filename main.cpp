@@ -2,14 +2,14 @@
 #define BUFFER_OFFSET(i) ((char*)NULL + (i))
 
 
-GLuint gProgram[1];
+GLuint gProgram;
 int gWidth, gHeight;
 int programCount = 1;
 
-GLint modelingMatrixLoc[1];
-GLint viewingMatrixLoc[1];
-GLint projectionMatrixLoc[1];
-GLint eyePosLoc[1];
+GLint modelingMatrixLoc;
+GLint viewingMatrixLoc;
+GLint projectionMatrixLoc;
+GLint eyePosLoc;
 
 glm::mat4 projectionMatrix;
 glm::mat4 viewingMatrix;
@@ -27,8 +27,8 @@ GLuint gVertexAttribBuffer, gIndexBuffer;
 GLint gInVertexLoc, gInNormalLoc;
 int gVertexDataSizeInBytes, gNormalDataSizeInBytes;
 
-int lightCount;
-int cPointX, cPointY;
+GLint lightCount;
+GLint cPointX, cPointY;
 PointLight *pointLights;
 
 bool ParseSurface(const string& fileName){
@@ -45,8 +45,8 @@ bool ParseSurface(const string& fileName){
 
 		for(int lightIndex = 0; lightIndex < lightCount && getline(myfile, curLine) ; ++lightIndex){
 			stringstream str(curLine);
-			str >> pointLights[lightIndex].x >> pointLights[lightIndex].y >> pointLights[lightIndex].z >>
-					pointLights[lightIndex].cRed >> pointLights[lightIndex].cGreen >> pointLights[lightIndex].cBlue;
+			str >> pointLights[lightIndex].position.x >> pointLights[lightIndex].position.y >> pointLights[lightIndex].position.z >>
+					pointLights[lightIndex].color.x >> pointLights[lightIndex].color.y >> pointLights[lightIndex].color.z;
 		}
 
 		getline(myfile, curLine); 	// initial read for the control point matrix
@@ -195,25 +195,23 @@ GLuint createFS(const char* shaderName){
 void initShaders(){
 	GLint status;
 
-	gProgram[0] = glCreateProgram();
+	gProgram = glCreateProgram();
 	GLuint vs1 = createVS("vert.glsl");
 	GLuint fs1 = createFS("frag.glsl");
-	glAttachShader(gProgram[0], vs1);
-	glAttachShader(gProgram[0], fs1);
-	glLinkProgram(gProgram[0]);
-	glGetProgramiv(gProgram[0], GL_LINK_STATUS, &status);
+	glAttachShader(gProgram, vs1);
+	glAttachShader(gProgram, fs1);
+	glLinkProgram(gProgram);
+	glGetProgramiv(gProgram, GL_LINK_STATUS, &status);
 
 	if (status != GL_TRUE){
 		cout << "Program link failed" << endl;
 		exit(-1);
 	}
 
-	for (int i = 0; i < 1; ++i){
-		modelingMatrixLoc[i] = glGetUniformLocation(gProgram[i], "modelingMatrix");
-		viewingMatrixLoc[i] = glGetUniformLocation(gProgram[i], "viewingMatrix");
-		projectionMatrixLoc[i] = glGetUniformLocation(gProgram[i], "projectionMatrix");
-		eyePosLoc[i] = glGetUniformLocation(gProgram[i], "eyePos");
-	}
+	modelingMatrixLoc = glGetUniformLocation(gProgram, "modelingMatrix");
+	viewingMatrixLoc = glGetUniformLocation(gProgram, "viewingMatrix");
+	projectionMatrixLoc = glGetUniformLocation(gProgram, "projectionMatrix");
+	eyePosLoc = glGetUniformLocation(gProgram, "eyePos");
 }
 
 void initVBO(){
@@ -317,11 +315,15 @@ void display(){
 	modelingMatrix = matT;
 
 	// Set the active program and the values of its uniform variables
-	glUseProgram(gProgram[activeProgramIndex]);
-	glUniformMatrix4fv(projectionMatrixLoc[activeProgramIndex], 1, GL_FALSE, glm::value_ptr(projectionMatrix));
-	glUniformMatrix4fv(viewingMatrixLoc[activeProgramIndex], 1, GL_FALSE, glm::value_ptr(viewingMatrix));
-	glUniformMatrix4fv(modelingMatrixLoc[activeProgramIndex], 1, GL_FALSE, glm::value_ptr(modelingMatrix));
-	glUniform3fv(eyePosLoc[activeProgramIndex], 1, glm::value_ptr(eyePos));
+	glUseProgram(gProgram);
+	glUniformMatrix4fv(projectionMatrixLoc, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+	glUniformMatrix4fv(viewingMatrixLoc, 1, GL_FALSE, glm::value_ptr(viewingMatrix));
+	glUniformMatrix4fv(modelingMatrixLoc, 1, GL_FALSE, glm::value_ptr(modelingMatrix));
+	glUniform3fv(eyePosLoc, 1, glm::value_ptr(eyePos));
+
+	glUniform1i(glGetUniformLocation(gProgram, "lightCount"), lightCount);
+	glUniform3fv(glGetUniformLocation(gProgram, "pointLights[0].position"), 1, glm::value_ptr(pointLights[0].position));
+	glUniform3fv(glGetUniformLocation(gProgram, "pointLights[0].color"), 1, glm::value_ptr(pointLights[0].color));
 
 	// Draw the scene
 	drawModel();

@@ -47,6 +47,6 @@ struct Face{
 };
 
 struct PointLight{
-	GLfloat x, y, z;
-	GLfloat cRed, cGreen, cBlue;
+	glm::vec3 position;
+	glm::vec3 color;
 };
