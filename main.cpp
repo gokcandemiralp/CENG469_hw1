@@ -27,15 +27,36 @@ GLuint gVertexAttribBuffer, gIndexBuffer;
 GLint gInVertexLoc, gInNormalLoc;
 int gVertexDataSizeInBytes, gNormalDataSizeInBytes;
 
+int lightCount;
+int cPointX, cPointY;
+
 bool ParseSurface(const string& fileName){
 	fstream myfile;
 	myfile.open(fileName.c_str(), std::ios::in);
+	string str_Y, str_X;
 
 	if (myfile.is_open()){
 		string curLine;
-		while (getline(myfile, curLine)){
+
+		getline(myfile, curLine); 		// initial read for light sources
+		lightCount = stoi(curLine);		// initial read for light sources
+
+		for(int lineIndex = 0; lineIndex < lightCount && getline(myfile, curLine) ; ++lineIndex){
 			std::cout << curLine << "\n";
 		}
+
+		getline(myfile, curLine); 	// initial read for the control point matrix
+		stringstream str(curLine);	// initial read for the control point matrix
+		str >> cPointY >> cPointX;	// initial read for the control point matrix
+
+		std::cout << cPointX << " " << cPointY << " ";
+
+		// for(int iy = 0; iy < cPointY && getline(myfile, curLine) ; ++iy){
+		// 	for(int ix = 0; ix < cPointX && getline(myfile, curLine, ' ') ; ++ix){
+		// 		std::cout << curLine << " ";
+		// 	}
+		// }
+
 		myfile.close();
 	}
 	else{
