@@ -45,3 +45,8 @@ struct Face{
 	}
 	GLuint vIndex[3], tIndex[3], nIndex[3];
 };
+
+struct PointLight{
+	GLfloat x, y, z;
+	GLfloat cRed, cGreen, cBlue;
+};

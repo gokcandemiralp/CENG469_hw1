@@ -29,6 +29,7 @@ int gVertexDataSizeInBytes, gNormalDataSizeInBytes;
 
 int lightCount;
 int cPointX, cPointY;
+PointLight *pointLights;
 
 bool ParseSurface(const string& fileName){
 	fstream myfile;
@@ -40,9 +41,12 @@ bool ParseSurface(const string& fileName){
 
 		getline(myfile, curLine); 		// initial read for light sources
 		lightCount = stoi(curLine);		// initial read for light sources
+		pointLights = new PointLight[lightCount];
 
-		for(int lineIndex = 0; lineIndex < lightCount && getline(myfile, curLine) ; ++lineIndex){
-			std::cout << curLine << "\n";
+		for(int lightIndex = 0; lightIndex < lightCount && getline(myfile, curLine) ; ++lightIndex){
+			stringstream str(curLine);
+			str >> pointLights[lightIndex].x >> pointLights[lightIndex].y >> pointLights[lightIndex].z >>
+					pointLights[lightIndex].cRed >> pointLights[lightIndex].cGreen >> pointLights[lightIndex].cBlue;
 		}
 
 		getline(myfile, curLine); 	// initial read for the control point matrix
