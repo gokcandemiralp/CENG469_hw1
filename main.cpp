@@ -301,14 +301,11 @@ void drawModel(){
 }
 
 void display(){
+	string tmp_str;
 	glClearColor(0, 0, 0, 1);
 	glClearDepth(1.0f);
 	glClearStencil(0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-	static float angle = 0;
-
-	float angleRad = (float)(angle / 180.0) * M_PI;
 
 	// Compute the modeling matrix
 	glm::mat4 matT = glm::translate(glm::mat4(1.0), glm::vec3(-0.1f, -0.2f, -7.0f));
@@ -322,13 +319,14 @@ void display(){
 	glUniform3fv(eyePosLoc, 1, glm::value_ptr(eyePos));
 
 	glUniform1i(glGetUniformLocation(gProgram, "lightCount"), lightCount);
-	glUniform3fv(glGetUniformLocation(gProgram, "pointLights[0].position"), 1, glm::value_ptr(pointLights[0].position));
-	glUniform3fv(glGetUniformLocation(gProgram, "pointLights[0].color"), 1, glm::value_ptr(pointLights[0].color));
 
-	// Draw the scene
+	for(int lightIndex = 0; lightIndex < lightCount ; ++lightIndex){
+		tmp_str = "pointLights[" + std::to_string(lightIndex) + "].position";
+		glUniform3fv(glGetUniformLocation(gProgram, tmp_str.c_str()), 1, glm::value_ptr(pointLights[0].position));
+		tmp_str = "pointLights[" + std::to_string(lightIndex) + "].color";
+		glUniform3fv(glGetUniformLocation(gProgram, tmp_str.c_str()), 1, glm::value_ptr(pointLights[0].color));
+	}
 	drawModel();
-
-	angle += 0.5;
 }
 
 void reshape(GLFWwindow* window, int w, int h){
