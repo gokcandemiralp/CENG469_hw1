@@ -58,7 +58,7 @@ bool ParseSurface(const string& fileName){
 
 		controlPoints = new Vertex*[cPointY];
 		for(int iy = 0; iy < cPointY ; ++iy){
-			controlPoints[iy] = new Vertex[cPointY];
+			controlPoints[iy] = new Vertex[cPointX];
 		}
 
 		GLfloat tempRead_z;
