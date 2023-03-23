@@ -34,12 +34,11 @@ void main(void){
 	vec3 N = normalize(nWorld);
 
 	vec3 lightPos, I, L, H;
-	float NdotL;
-	float NdotH;
+	float NdotL, NdotH;
 	vec3 diffuseColor  = vec3(0,0,0);
 	vec3 specularColor = vec3(0,0,0);
 	for(int i = 0 ; i<lightCount ; ++i){
-		lightPos = pointLights[i].position; // light position in world coordinates
+		lightPos = pointLights[i].position;	// light position in world coordinates
 		I = pointLights[i].color;   		// point light intensity
 		L = normalize(lightPos - vec3(pWorld));
 		H = normalize(L + V);
@@ -52,7 +51,6 @@ void main(void){
 	vec3 ambientColor = Iamb * ka;
 
 	color = vec4(diffuseColor + specularColor + ambientColor, 1);
-
-    gl_Position = projectionMatrix * viewingMatrix * modelingMatrix * vec4(inVertex, 1);
+    	gl_Position = projectionMatrix * viewingMatrix * modelingMatrix * vec4(inVertex, 1);
 }
 
