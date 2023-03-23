@@ -14,7 +14,7 @@ GLint eyePosLoc;
 glm::mat4 projectionMatrix;
 glm::mat4 viewingMatrix;
 glm::mat4 modelingMatrix;
-glm::vec3 eyePos(0, 0, 0);
+glm::vec3 eyePos(0, 0, 2);
 
 vector<Vertex> gVertices;
 vector<Texture> gTextures;
@@ -28,6 +28,7 @@ int gVertexDataSizeInBytes, gNormalDataSizeInBytes;
 GLint lightCount;
 GLint cPointX, cPointY;
 PointLight *pointLights;
+float **heightMap;
 
 float rotationAngle = -30;
 float coordMultiplier = 0.8;
@@ -55,13 +56,24 @@ bool ParseSurface(const string& fileName){
 		stringstream str(curLine);	// initial read for the control point matrix
 		str >> cPointY >> cPointX;	// initial read for the control point matrix
 
-		std::cout << cPointX << " " << cPointY << " ";
+		heightMap = new float*[cPointY];
+		for(int iy = 0; iy < cPointY ; ++iy){
+			heightMap[iy] = new float[cPointX];
+		}
 
-		// for(int iy = 0; iy < cPointY && getline(myfile, curLine) ; ++iy){
-		// 	for(int ix = 0; ix < cPointX && getline(myfile, curLine, ' ') ; ++ix){
-		// 		std::cout << curLine << " ";
-		// 	}
-		// }
+		for(int iy = 0; iy < cPointY && getline(myfile, curLine) ; ++iy){
+			stringstream str(curLine);
+			for(int ix = 0; ix < cPointX ; ++ix){
+				str >> heightMap[iy][ix];
+			}
+		}
+
+		for(int iy = 0; iy < cPointY ; ++iy){
+			for(int ix = 0; ix < cPointX ; ++ix){
+				cout << heightMap[iy][ix] << " ";
+			}
+			cout << "\n";
+		}
 
 		myfile.close();
 	}
@@ -221,7 +233,6 @@ void initVBO(){
 	glGenVertexArrays(1, &vao);
 	assert(vao > 0);
 	glBindVertexArray(vao);
-	cout << "vao = " << vao << endl;
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
@@ -324,13 +335,13 @@ void display(){
 	glUniform3fv(eyePosLoc, 1, glm::value_ptr(eyePos));
 
 	glUniform1i(glGetUniformLocation(gProgram, "lightCount"), lightCount);
-
 	for(int lightIndex = 0; lightIndex < lightCount ; ++lightIndex){
 		tmp_str = "pointLights[" + std::to_string(lightIndex) + "].position";
 		glUniform3fv(glGetUniformLocation(gProgram, tmp_str.c_str()), 1, glm::value_ptr(pointLights[lightIndex].position));
 		tmp_str = "pointLights[" + std::to_string(lightIndex) + "].color";
 		glUniform3fv(glGetUniformLocation(gProgram, tmp_str.c_str()), 1, glm::value_ptr(pointLights[lightIndex].color));
 	}
+	
 	drawModel();
 }
 
