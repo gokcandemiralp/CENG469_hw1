@@ -17,7 +17,6 @@ glm::mat4 modelingMatrix;
 glm::vec3 eyePos(0, 0, 2);
 
 vector<Vertex> gVertices;
-vector<Texture> gTextures;
 vector<Normal> gNormals;
 vector<Face> gFaces;
 
@@ -28,11 +27,12 @@ int gVertexDataSizeInBytes, gNormalDataSizeInBytes;
 GLint lightCount;
 GLint cPointX, cPointY;
 PointLight *pointLights;
-float **heightMap;
 
 float rotationAngle = -30;
 float coordMultiplier = 0.8;
 int sampleRate = 10;
+
+Vertex **controlPoints;
 
 bool ParseSurface(const string& fileName){
 	fstream myfile;
@@ -56,21 +56,32 @@ bool ParseSurface(const string& fileName){
 		stringstream str(curLine);	// initial read for the control point matrix
 		str >> cPointY >> cPointX;	// initial read for the control point matrix
 
-		heightMap = new float*[cPointY];
+		controlPoints = new Vertex*[cPointY];
 		for(int iy = 0; iy < cPointY ; ++iy){
-			heightMap[iy] = new float[cPointX];
+			controlPoints[iy] = new Vertex[cPointY];
 		}
 
+		GLfloat tempRead_z;
+		GLfloat dGrid = min(1.0/(cPointX-1) , 1.0/(cPointY-1)); // Find the smallest grid step to fit
+		cout << "dGrid: " << dGrid << "\n"; 
+		GLfloat comp_y = -0.5;
 		for(int iy = 0; iy < cPointY && getline(myfile, curLine) ; ++iy){
 			stringstream str(curLine);
+			GLfloat comp_x = -0.5;
 			for(int ix = 0; ix < cPointX ; ++ix){
-				str >> heightMap[iy][ix];
+				str >> tempRead_z;
+				controlPoints[iy][ix] = Vertex(comp_x,comp_y,tempRead_z);
+				comp_x += dGrid;
 			}
+			cout << "comp_y: " << comp_y << "\n"; 
+			comp_y += dGrid;
 		}
 
-		for(int iy = 0; iy < cPointY ; ++iy){
+		for(int iy = 0; iy < cPointY ; ++iy){ // Preview and delete
 			for(int ix = 0; ix < cPointX ; ++ix){
-				cout << heightMap[iy][ix] << " ";
+				// cout << heightMap[iy][ix] << " ";
+				Vertex tempVertex = controlPoints[iy][ix];
+				cout << "[ x:" <<tempVertex.x << " y:" <<tempVertex.y << " z:" <<tempVertex.z << " ] ";
 			}
 			cout << "\n";
 		}
@@ -100,7 +111,6 @@ bool ParseObj(const string& fileName){
 					if (curLine[1] == 't'){ // texture
 						str >> tmp; // consume "vt"
 						str >> c1 >> c2;
-						gTextures.push_back(Texture(c1, c2));
 					}
 					else if (curLine[1] == 'n'){ // normal
 						str >> tmp; // consume "vn"
@@ -414,7 +424,7 @@ int main(int argc, char** argv)   // Create Main Function For Bringing It All To
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	int width = 640, height = 640;
+	int width = 800, height = 600;
 	window = glfwCreateWindow(width, height, "Simple Example", NULL, NULL);
 
 	if (!window){

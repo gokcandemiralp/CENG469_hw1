@@ -18,6 +18,7 @@ using namespace std;
 
 struct Vertex{
 	Vertex(GLfloat inX, GLfloat inY, GLfloat inZ) : x(inX), y(inY), z(inZ) { }
+	Vertex() : x(0), y(0), z(0) { }
 	GLfloat x, y, z;
 };
 
