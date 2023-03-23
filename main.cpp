@@ -28,8 +28,10 @@ int gVertexDataSizeInBytes, gNormalDataSizeInBytes;
 GLint lightCount;
 GLint cPointX, cPointY;
 PointLight *pointLights;
+
 float rotationAngle = -30;
 float coordMultiplier = 0.8;
+int sampleRate = 10;
 
 bool ParseSurface(const string& fileName){
 	fstream myfile;
@@ -353,22 +355,28 @@ void keyboard(GLFWwindow* window, int key, int scancode, int action, int mods)
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
 	}
 	else if (key == GLFW_KEY_W && action == GLFW_PRESS){
-		;
+		if(sampleRate < 80){sampleRate += 2;}
+		cout << "Key W Pressed | sampleRate ==  " << sampleRate << "\n";
 	}
 	else if (key == GLFW_KEY_S && action == GLFW_PRESS){
-		;
+		if(sampleRate > 2){sampleRate -= 2;}
+		cout << "Key S Pressed | sampleRate ==  " << sampleRate << "\n";
 	}
 	else if (key == GLFW_KEY_E && action == GLFW_PRESS){
 		coordMultiplier += 0.1;
+		cout << "Key E Pressed | coordMultiplier ==  " << coordMultiplier << "\n";
 	}
 	else if (key == GLFW_KEY_D && action == GLFW_PRESS){
-		coordMultiplier -= 0.1;
+		if(coordMultiplier>0.11){coordMultiplier -= 0.1;}
+		cout << "Key D Pressed | coordMultiplier ==  " << coordMultiplier << "\n";
 	}
 	else if (key == GLFW_KEY_R && action == GLFW_PRESS){
-		rotationAngle += 10;;
+		rotationAngle += 10;
+		cout << "Key R Pressed | rotationAngle ==  " << rotationAngle << "\n";
 	}
 	else if (key == GLFW_KEY_F && action == GLFW_PRESS){
 		rotationAngle -= 10;
+		cout << "Key F Pressed | rotationAngle ==  " << rotationAngle << "\n";
 	}
 }
 
