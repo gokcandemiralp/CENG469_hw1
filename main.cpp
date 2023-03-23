@@ -81,7 +81,7 @@ bool ParseSurface(const string& fileName){
 			for(int ix = 0; ix < cPointX ; ++ix){
 				// cout << heightMap[iy][ix] << " ";
 				Vertex tempVertex = controlPoints[iy][ix];
-				cout << "[ x:" <<tempVertex.x << " y:" <<tempVertex.y << " z:" <<tempVertex.z << " ] ";
+				cout << fixed << setprecision(1) << "[x:" <<tempVertex.x << " y:" <<tempVertex.y << " z:" <<tempVertex.z << "] ";
 			}
 			cout << "\n";
 		}
