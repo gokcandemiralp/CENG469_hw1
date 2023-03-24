@@ -1,4 +1,4 @@
-#include "main.h" 
+#include "utils.h" 
 #define BUFFER_OFFSET(i) ((char*)NULL + (i))
 
 
@@ -78,14 +78,8 @@ bool ParseSurface(const string& fileName){
 			comp_y += dGrid;
 		}
 
-		for(int iy = 0; iy < cPointY ; ++iy){ // Preview and delete
-			for(int ix = 0; ix < cPointX ; ++ix){
-				Vertex tempVertex = controlPoints[iy][ix];
-				cout << fixed << setprecision(1) << "[x:" <<tempVertex.x << " y:" <<tempVertex.y << " z:" <<tempVertex.z << "] ";
-			}
-			cout << "\n";
-		}
-
+		PrintControlPoints(cPointY, cPointX, controlPoints); // Preview of the controlPoints
+		BezierSurface(cPointY, cPointX, 0.25, 0.25, controlPoints).printVertex();
 		myfile.close();
 	}
 	else{
