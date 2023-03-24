@@ -22,7 +22,7 @@ vector<Face> gFaces;
 
 GLuint gVertexAttribBuffer, gIndexBuffer;
 GLint gInVertexLoc, gInNormalLoc;
-int gVertexDataSizeInBytes, gNormalDataSizeInBytes;
+int gVertexDataSizeInBytes, gNormalDataSizeInBytes, indexDataSizeInBytes;
 
 GLint lightCount;
 GLint cPointX, cPointY;
@@ -56,7 +56,7 @@ bool ParseSurface(const string& fileName){
 		stringstream str(curLine);	// initial read for the control point matrix
 		str >> cPointY >> cPointX;	// initial read for the control point matrix
 
-		controlPoints = new Vertex*[cPointY];
+		controlPoints = new Vertex*[cPointY];	// Allocate space for Control Points
 		for(int iy = 0; iy < cPointY ; ++iy){
 			controlPoints[iy] = new Vertex[cPointX];
 		}
@@ -79,7 +79,6 @@ bool ParseSurface(const string& fileName){
 
 		for(int iy = 0; iy < cPointY ; ++iy){ // Preview and delete
 			for(int ix = 0; ix < cPointX ; ++ix){
-				// cout << heightMap[iy][ix] << " ";
 				Vertex tempVertex = controlPoints[iy][ix];
 				cout << fixed << setprecision(1) << "[x:" <<tempVertex.x << " y:" <<tempVertex.y << " z:" <<tempVertex.z << "] ";
 			}
@@ -155,7 +154,6 @@ bool ParseObj(const string& fileName){
 	else{
 		return false;
 	}	
-	assert(gVertices.size() == gNormals.size());
 	return true;
 }
 
@@ -258,26 +256,15 @@ void initVBO(){
 
 	gVertexDataSizeInBytes = gVertices.size() * 3 * sizeof(GLfloat);
 	gNormalDataSizeInBytes = gNormals.size() * 3 * sizeof(GLfloat);
-	int indexDataSizeInBytes = gFaces.size() * 3 * sizeof(GLuint);
+	indexDataSizeInBytes = gFaces.size() * 3 * sizeof(GLuint);
 	GLfloat* vertexData = new GLfloat[gVertices.size() * 3];
 	GLfloat* normalData = new GLfloat[gNormals.size() * 3];
 	GLuint* indexData = new GLuint[gFaces.size() * 3];
-
-	float minX = 1e6, maxX = -1e6;
-	float minY = 1e6, maxY = -1e6;
-	float minZ = 1e6, maxZ = -1e6;
 
 	for (int i = 0; i < gVertices.size(); ++i){
 		vertexData[3 * i] = gVertices[i].x;
 		vertexData[3 * i + 1] = gVertices[i].y;
 		vertexData[3 * i + 2] = gVertices[i].z;
-
-		minX = std::min(minX, gVertices[i].x);
-		maxX = std::max(maxX, gVertices[i].x);
-		minY = std::min(minY, gVertices[i].y);
-		maxY = std::max(maxY, gVertices[i].y);
-		minZ = std::min(minZ, gVertices[i].z);
-		maxZ = std::max(maxZ, gVertices[i].z);
 	}
 
 	for (int i = 0; i < gNormals.size(); ++i){
@@ -401,8 +388,7 @@ void keyboard(GLFWwindow* window, int key, int scancode, int action, int mods)
 	}
 }
 
-void mainLoop(GLFWwindow* window)
-{
+void mainLoop(GLFWwindow* window){
 	while (!glfwWindowShouldClose(window)){
 		display();
 		glfwSwapBuffers(window);
@@ -410,8 +396,7 @@ void mainLoop(GLFWwindow* window)
 	}
 }
 
-int main(int argc, char** argv)   // Create Main Function For Bringing It All Together
-{
+int main(int argc, char** argv){
 	if(argc != 2){return 1;}
 	ParseSurface(argv[1]);
 	ParseObj("bunny.obj");
@@ -435,7 +420,6 @@ int main(int argc, char** argv)   // Create Main Function For Bringing It All To
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
 
-	// Initialize GLEW to setup the OpenGL Function pointers
 	if (GLEW_OK != glewInit()){
 		std::cout << "Failed to initialize GLEW" << std::endl;
 		return EXIT_FAILURE;
