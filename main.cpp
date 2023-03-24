@@ -33,6 +33,7 @@ float coordMultiplier = 0.8;
 int sampleRate = 10;
 
 Vertex **controlPoints;
+bool updateSurface = true;
 
 bool ParseSurface(const string& fileName){
 	fstream myfile;
@@ -91,6 +92,12 @@ bool ParseSurface(const string& fileName){
 		return false;
 	}
 	return true;
+}
+
+void CreateSurface(){
+	// do all necessary computations
+	// set the flag back to false
+	updateSurface = false;
 }
 
 bool ParseObj(const string& fileName){
@@ -317,11 +324,12 @@ void display(){
 	glClearStencil(0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
+	CreateSurface(); // Create vetices according to detail amount and control points
+
 	// Compute the modeling matrix
 	glm::mat4 matT = glm::translate(glm::mat4(1.0), glm::vec3(-0.1f, -0.2f, -7.0f));
 	glm::mat4 matR = glm::rotate(glm::mat4(1.f), glm::radians(rotationAngle), glm::vec3(0, 1, 0));
 	glm::mat4 matS = glm::scale(glm::mat4(1.f), glm::vec3(coordMultiplier,coordMultiplier,coordMultiplier));
-
 	modelingMatrix = matT * matS * matR;
 
 	// Set the active program and the values of its uniform variables
@@ -363,11 +371,17 @@ void keyboard(GLFWwindow* window, int key, int scancode, int action, int mods)
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
 	}
 	else if (key == GLFW_KEY_W && action == GLFW_PRESS){
-		if(sampleRate < 80){sampleRate += 2;}
+		if(sampleRate < 80){
+			sampleRate += 2;
+			updateSurface = true;
+		}
 		cout << "Key W Pressed | sampleRate ==  " << sampleRate << "\n";
 	}
 	else if (key == GLFW_KEY_S && action == GLFW_PRESS){
-		if(sampleRate > 2){sampleRate -= 2;}
+		if(sampleRate > 2){
+			sampleRate -= 2;
+			updateSurface = true;
+		}
 		cout << "Key S Pressed | sampleRate ==  " << sampleRate << "\n";
 	}
 	else if (key == GLFW_KEY_E && action == GLFW_PRESS){

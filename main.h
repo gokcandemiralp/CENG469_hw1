@@ -1,3 +1,6 @@
+#ifndef MAIN_H
+#define MAIN_H
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -53,3 +56,5 @@ struct PointLight{
 	glm::vec3 position;
 	glm::vec3 color;
 };
+
+#endif
