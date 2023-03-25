@@ -13,15 +13,20 @@ int Combination(int n, int k){
 }
 
 float Bernstein(int i, int n, float s){
-    cout << "n:" << n << " i:" << i << " = " << Combination(n,i) << "\n";
+    // cout << "n:" << n << " i:" << i << " = " << Combination(n,i) << "\n";
+    // cout << "Combination( " << n << "," << i << ") = " << Combination(n,i) 
+    //      << " | pow(" << 1-s << "," << n-i << ")) = " << pow((1-s),(n-i)) 
+    //      << " | pow(" << s << "," << i << ") = " << pow(s,i) << "\n";
     return Combination(n,i)*pow((1-s),(n-i))*pow(s,i);
 }
 
-Vertex BezierSurface(int n, int m, float s, float t, Vertex **controlPoints){
-    Vertex ans;
+
+float BezierSurface(int n, int m, float s, float t, Vertex **controlPoints){
+    float ans;
     for(int i = 0 ; i<n ; ++i){
         for(int j = 0 ; j<m ; ++j){
-            ans = ans + controlPoints[i][j] * Bernstein(i,n,s) * Bernstein(j,m,t);
+            cout << "ans["<< i <<"," << j <<"] = " <<  Bernstein(i,n-1,s) * Bernstein(j,m-1,t) << "\n";
+            ans = ans + controlPoints[i][j].z * Bernstein(i,n-1,s) * Bernstein(j,m-1,t);
         }        
     }
     return ans;

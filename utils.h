@@ -26,20 +26,6 @@ struct Vertex{
 	Vertex() : x(0), y(0), z(0) { }
 	GLfloat x, y, z;
 
-	Vertex& operator * (const float multiplier){
-		x = multiplier * x;
-		y = multiplier * y;
-		z = multiplier * z;
-		return *this;
-	}
-
-	Vertex& operator + (const Vertex addent){
-		x = addent.x + x;
-		y = addent.y + y;
-		z = addent.z + z;
-		return *this;
-	}
-
     void printVertex(){
         cout << fixed << setprecision(3) << "[" << x << "," << y << "," << z << "]";
     }
@@ -77,7 +63,7 @@ struct PointLight{
 
 int Combination(int n, int k);
 float Bernstein(int n, float t);
-Vertex BezierSurface(int n, int m, float s, float t, Vertex **controlPoints);
+float BezierSurface(int n, int m, float s, float t, Vertex **controlPoints);
 void PrintControlPoints(int cPointY,int cPointX, Vertex **controlPoints);
 
 #endif
