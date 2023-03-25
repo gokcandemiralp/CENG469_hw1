@@ -64,7 +64,6 @@ bool ParseSurface(const string& fileName){
 
 		GLfloat tempRead_z;
 		GLfloat dGrid = min(1.0/(cPointX-1) , 1.0/(cPointY-1)); // Find the smallest grid step to fit
-		cout << "dGrid: " << dGrid << "\n"; 
 		GLfloat comp_y = -0.5;
 		for(int iy = 0; iy < cPointY && getline(myfile, curLine) ; ++iy){
 			stringstream str(curLine);
@@ -74,12 +73,16 @@ bool ParseSurface(const string& fileName){
 				controlPoints[iy][ix] = Vertex(comp_x,comp_y,tempRead_z);
 				comp_x += dGrid;
 			}
-			cout << "comp_y: " << comp_y << "\n"; 
 			comp_y += dGrid;
 		}
 
 		PrintControlPoints(cPointY, cPointX, controlPoints); // Preview of the controlPoints
-		BezierSurface(cPointY, cPointX, 0.25, 0.25, controlPoints).printVertex();
+		
+		BezierSurface(cPointY, cPointX, 0.0, 0.0, controlPoints).printVertex(); cout << "\n";
+		BezierSurface(cPointY, cPointX, 0.25, 0.25, controlPoints).printVertex(); cout << "\n";
+		BezierSurface(cPointY, cPointX, 0.5, 0.5, controlPoints).printVertex(); cout << "\n";
+		BezierSurface(cPointY, cPointX, 0.75, 0.75, controlPoints).printVertex(); cout << "\n";
+		BezierSurface(cPointY, cPointX, 1.0, 1.0, controlPoints).printVertex(); cout << "\n";
 		myfile.close();
 	}
 	else{

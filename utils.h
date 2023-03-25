@@ -41,7 +41,7 @@ struct Vertex{
 	}
 
     void printVertex(){
-        cout << fixed << setprecision(1) << "[x:" << x << " y:" << y << " z:" << z << "] ";
+        cout << fixed << setprecision(3) << "[" << x << "," << y << "," << z << "]";
     }
 };
 
@@ -75,7 +75,7 @@ struct PointLight{
 	glm::vec3 color;
 };
 
-float Combination(int n, int k);
+int Combination(int n, int k);
 float Bernstein(int n, float t);
 Vertex BezierSurface(int n, int m, float s, float t, Vertex **controlPoints);
 void PrintControlPoints(int cPointY,int cPointX, Vertex **controlPoints);

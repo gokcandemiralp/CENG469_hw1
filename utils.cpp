@@ -1,17 +1,19 @@
 #include "utils.h"
 
-float Combination(int n, int k){
-    float value = 1.0;
-    for (int i = 1; i <= k; i++){
-        value = value * ((n + 1 - i) / i);
-    }
-    if (n == k){
-        value = 1;
-    }
-    return value;
+int Combination(int n, int k){
+    if( k==0 || n == k ){return 1;}
+    k = min(k , (n-k));
+    int divident = n;
+    int divisor = k;
+    for(; k > 1 ;){
+        divident *= --n;
+        divisor *= --k;
+    }    
+    return divident/divisor;
 }
 
 float Bernstein(int i, int n, float s){
+    cout << "n:" << n << " i:" << i << " = " << Combination(n,i) << "\n";
     return Combination(n,i)*pow((1-s),(n-i))*pow(s,i);
 }
 
