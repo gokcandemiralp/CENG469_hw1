@@ -22,10 +22,10 @@ float Bernstein(int i, int n, float s){
 
 
 float BezierSurface(int n, int m, float s, float t, Vertex **controlPoints){
-    float ans;
+    float ans = 0;
     for(int i = 0 ; i<n ; ++i){
         for(int j = 0 ; j<m ; ++j){
-            cout << "ans["<< i <<"," << j <<"] = " <<  Bernstein(i,n-1,s) * Bernstein(j,m-1,t) << "\n";
+            // cout << "ans["<< i <<"," << j <<"] = " <<  Bernstein(i,n-1,s) * Bernstein(j,m-1,t) << "\n";
             ans = ans + controlPoints[i][j].z * Bernstein(i,n-1,s) * Bernstein(j,m-1,t);
         }        
     }

@@ -78,14 +78,9 @@ bool ParseSurface(const string& fileName){
 
 		PrintControlPoints(cPointY, cPointX, controlPoints); // Preview of the controlPoints
 		
-		// float fraction;
-		// for(int i = 1 ; i<21; ++i){
-		// 	fraction = 1.0/i;
-		// 	cout << BezierSurface(cPointY, cPointX, fraction, fraction, controlPoints) << "\n";
-		// }
-
-		cout << BezierSurface(cPointY, cPointX, 0.33, 0.33, controlPoints) << "\n";
-		cout << BezierSurface(cPointY, cPointX, 0.66, 0.66, controlPoints) << "\n";
+		for(float fraction = 0 ; fraction <=1; fraction += 0.05){
+			cout << fraction << ": " <<  BezierSurface(cPointY, cPointX, fraction, fraction, controlPoints) << "\n";
+		}
 		
 		myfile.close();
 	}
