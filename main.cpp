@@ -33,6 +33,7 @@ float coordMultiplier = 0.8;
 int sampleRate = 10;
 
 float **controlPoints;
+float **tempControlPoints;
 bool updateSurface = true;
 
 bool ParseSurface(const string& fileName){
@@ -78,12 +79,23 @@ bool ParseSurface(const string& fileName){
 
 		PrintControlPoints(cPointY, cPointX, controlPoints); // Preview of the controlPoints
 
+		tempControlPoints = new float*[4];	// Allocate space for Temp Buffer Control Points
+		for(int iy = 0; iy < 4 ; ++iy){
+			tempControlPoints[iy] = new float[4];
+		}
+
 		for(int anchorY = 0; anchorY < cPointY/4 ; ++anchorY){
 			for(int anchorX = 0; anchorX < cPointX/4 ; ++anchorX){
 				cout << "(" << anchorY << "," << anchorX << ") anchor: \n"; 
 				for(int offsetY = 0 ; offsetY < 4 ; ++offsetY){
 					for(int offsetX = 0 ; offsetX < 4 ; ++offsetX){
-						cout << controlPoints[4*anchorY+offsetY][4*anchorX+offsetX] << " "; 
+						tempControlPoints[offsetY][offsetX] = controlPoints[4*anchorY+offsetY][4*anchorX+offsetX];
+					}
+					
+				}
+				for(float fractionY = 0 ; fractionY <= 1.0 ; fractionY +=0.1){
+					for(float fractionX = 0 ; fractionX <= 1.0 ; fractionX +=0.1){
+						cout << setprecision(3) << calcBezierSurface(fractionY, fractionX, tempControlPoints) << " ";
 					}
 					cout << "\n";
 				}
