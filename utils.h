@@ -63,7 +63,7 @@ struct PointLight{
 
 int Combination(int n, int k);
 float Bernstein(int n, float t);
-float BezierSurface(int n, int m, float s, float t, Vertex **controlPoints);
-void PrintControlPoints(int cPointY,int cPointX, Vertex **controlPoints);
+float calcBezierSurface(float s, float t, float **controlPoints);
+void PrintControlPoints(int cPointY,int cPointX, float **controlPoints);
 
 #endif

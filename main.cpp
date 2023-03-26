@@ -32,7 +32,7 @@ float rotationAngle = -30;
 float coordMultiplier = 0.8;
 int sampleRate = 10;
 
-Vertex **controlPoints;
+float **controlPoints;
 bool updateSurface = true;
 
 bool ParseSurface(const string& fileName){
@@ -57,9 +57,9 @@ bool ParseSurface(const string& fileName){
 		stringstream str(curLine);	// initial read for the control point matrix
 		str >> cPointY >> cPointX;	// initial read for the control point matrix
 
-		controlPoints = new Vertex*[cPointY];	// Allocate space for Control Points
+		controlPoints = new float*[cPointY];	// Allocate space for Control Points
 		for(int iy = 0; iy < cPointY ; ++iy){
-			controlPoints[iy] = new Vertex[cPointX];
+			controlPoints[iy] = new float[cPointX];
 		}
 
 		GLfloat tempRead_z;
@@ -70,18 +70,28 @@ bool ParseSurface(const string& fileName){
 			GLfloat comp_x = -0.5;
 			for(int ix = 0; ix < cPointX ; ++ix){
 				str >> tempRead_z;
-				controlPoints[iy][ix] = Vertex(comp_x,comp_y,tempRead_z);
+				controlPoints[iy][ix] = tempRead_z;
 				comp_x += dGrid;
 			}
 			comp_y += dGrid;
 		}
 
 		PrintControlPoints(cPointY, cPointX, controlPoints); // Preview of the controlPoints
-		
-		for(float fraction = 0 ; fraction <=1; fraction += 0.05){
-			cout << fraction << ": " <<  BezierSurface(cPointY, cPointX, fraction, fraction, controlPoints) << "\n";
+
+		for(int anchorY = 0; anchorY < cPointY/4 ; ++anchorY){
+			for(int anchorX = 0; anchorX < cPointX/4 ; ++anchorX){
+				cout << "(" << anchorY << "," << anchorX << ") anchor: \n"; 
+				for(int offsetY = 0 ; offsetY < 4 ; ++offsetY){
+					for(int offsetX = 0 ; offsetX < 4 ; ++offsetX){
+						cout << controlPoints[4*anchorY+offsetY][4*anchorX+offsetX] << " "; 
+					}
+					cout << "\n";
+				}
+			}
 		}
-		
+
+		// cout << fraction << ": " <<  calcBezierSurface(fraction, fraction, controlPoints) << "\n";
+
 		myfile.close();
 	}
 	else{
