@@ -36,6 +36,32 @@ float **controlPoints;
 float **tempControlPoints;
 bool updateSurface = true;
 
+void calcSurfaceVertices(){
+	// do all necessary computations
+	// set the flag back to false
+	if(!updateSurface){return;}
+	for(int anchorY = 0; anchorY < cPointY/4 ; ++anchorY){
+		for(int anchorX = 0; anchorX < cPointX/4 ; ++anchorX){
+			cout << setprecision(3) << "anchor:(" << anchorY << "," << anchorX << ") | With fraction: " << (1.0/sampleRate) << " \n"; 
+			for(int offsetY = 0 ; offsetY < 4 ; ++offsetY){
+				for(int offsetX = 0 ; offsetX < 4 ; ++offsetX){
+					tempControlPoints[offsetY][offsetX] = controlPoints[4*anchorY+offsetY][4*anchorX+offsetX];
+				}
+				
+			}
+			
+			float fraction = 1.0/(sampleRate*3);
+			for(float iy = 0 ; iy <= 3*sampleRate; ++iy){
+				for(float ix = 0 ; ix <= 3*sampleRate ; ++ix){
+					cout << calcBezierSurface(fraction*iy, fraction*ix, tempControlPoints) << " ";
+				}
+				cout << "\n";
+			}
+		}
+	}
+	updateSurface = false;
+}
+
 bool ParseSurface(const string& fileName){
 	fstream myfile;
 	myfile.open(fileName.c_str(), std::ios::in);
@@ -84,38 +110,12 @@ bool ParseSurface(const string& fileName){
 			tempControlPoints[iy] = new float[4];
 		}
 
-		for(int anchorY = 0; anchorY < cPointY/4 ; ++anchorY){
-			for(int anchorX = 0; anchorX < cPointX/4 ; ++anchorX){
-				cout << "(" << anchorY << "," << anchorX << ") anchor: \n"; 
-				for(int offsetY = 0 ; offsetY < 4 ; ++offsetY){
-					for(int offsetX = 0 ; offsetX < 4 ; ++offsetX){
-						tempControlPoints[offsetY][offsetX] = controlPoints[4*anchorY+offsetY][4*anchorX+offsetX];
-					}
-					
-				}
-				for(float fractionY = 0 ; fractionY <= 1.0 ; fractionY +=0.1){
-					for(float fractionX = 0 ; fractionX <= 1.0 ; fractionX +=0.1){
-						cout << setprecision(3) << calcBezierSurface(fractionY, fractionX, tempControlPoints) << " ";
-					}
-					cout << "\n";
-				}
-			}
-		}
-
-		// cout << fraction << ": " <<  calcBezierSurface(fraction, fraction, controlPoints) << "\n";
-
 		myfile.close();
 	}
 	else{
 		return false;
 	}
 	return true;
-}
-
-void CreateSurface(){
-	// do all necessary computations
-	// set the flag back to false
-	updateSurface = false;
 }
 
 bool ParseObj(const string& fileName){
@@ -342,7 +342,7 @@ void display(){
 	glClearStencil(0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-	CreateSurface(); // Create vetices according to detail amount and control points
+	calcSurfaceVertices(); // Create vetices according to detail amount and control points
 
 	// Compute the modeling matrix
 	glm::mat4 matT = glm::translate(glm::mat4(1.0), glm::vec3(-0.1f, -0.2f, -7.0f));
