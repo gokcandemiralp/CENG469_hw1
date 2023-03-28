@@ -50,9 +50,9 @@ void calcSurfaceVertices(){
 				
 			}
 			
-			float fraction = 1.0/(sampleRate*3);
-			for(float iy = 0 ; iy <= 3*sampleRate; ++iy){
-				for(float ix = 0 ; ix <= 3*sampleRate ; ++ix){
+			float fraction = 1.0/sampleRate;
+			for(float iy = 0 ; iy < sampleRate; ++iy){
+				for(float ix = 0 ; ix < sampleRate ; ++ix){
 					cout << calcBezierSurface(fraction*iy, fraction*ix, tempControlPoints) << " ";
 				}
 				cout << "\n";
