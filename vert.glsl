@@ -36,15 +36,11 @@ void main(void){
 
 	vec3 lightPos, I, L, H;
 	float NdotL, NdotH;
-	float distanceModifier = 0.00001;
 	vec3 diffuseColor  = vec3(0,0,0);
 	vec3 specularColor = vec3(0,0,0);
 	for(int i = 0 ; i<lightCount ; ++i){
 		lightPos = pointLights[i].position;	// light position in world coordinates
-		distanceModifier += (vP.x - lightPos.x)*(vP.x - lightPos.x) 
-						  + (vP.y - lightPos.y)*(vP.y - lightPos.y) 
-						  + (vP.z - lightPos.z)*(vP.z - lightPos.z);
-		I = pointLights[i].color / distanceModifier ;   		// point light intensity
+		I = pointLights[i].color;   		// point light intensity
 		L = normalize(lightPos - vec3(pWorld));
 		H = normalize(L + V);
 		NdotL = dot(N, L); // for diffuse component
