@@ -27,6 +27,7 @@ PointLight *pointLights;
 float rotationAngle = -30;
 float coordMultiplier = 0.8;
 int sampleRate = 10;
+int surfaceCount = 1;
 
 float **controlPoints;
 float **tempControlPoints;
@@ -38,17 +39,19 @@ void calcSurfaceVertices(){
 	int anchorCountY = cPointY/4;
 	int anchorCountX = cPointX/4;
 	int anchorDownScale = max(anchorCountX,anchorCountY);
-	int surfaceCount = anchorCountX * anchorCountY;
 	int surfaceIndex = 0;
 	float surfaceSize = 1.0/anchorDownScale;
+	surfaceCount = anchorCountX * anchorCountY;
 
 	int verticesPerSurface = sampleRate * sampleRate;
 	int squaresPerSurface = (sampleRate-1) * (sampleRate-1);
 
 	int vertexEntries = verticesPerSurface * 3 * surfaceCount;
 	int faceEntries = squaresPerSurface * 6 * surfaceCount;
-	cout << "faceEntries = " << faceEntries << "\n";
+	
 	cout << "surfaceCount = " << surfaceCount << "\n";
+	cout << "faceEntries = " << faceEntries << "\n";
+	cout << "vertexEntries = " << vertexEntries << "\n";
 	
 	gVertexDataSizeInBytes = vertexEntries * sizeof(GLfloat);
 	gNormalDataSizeInBytes = vertexEntries * sizeof(GLfloat);
@@ -60,6 +63,7 @@ void calcSurfaceVertices(){
 	for(int anchorY = 0; anchorY < anchorCountY ; ++anchorY){
 		for(int anchorX = 0; anchorX < anchorCountX ; ++anchorX){
 			cout << setprecision(3) << "surfaceIndex :(" << surfaceIndex << ") | With fraction: " << 1.0/((sampleRate-1)*anchorDownScale) << " \n"; 
+			cout << "anchorY == " << anchorY << " | anchorX == " << anchorX << "\n";
 			for(int offsetY = 0 ; offsetY < 4 ; ++offsetY){
 				for(int offsetX = 0 ; offsetX < 4 ; ++offsetX){
 					tempControlPoints[offsetY][offsetX] = controlPoints[4*anchorY+offsetY][4*anchorX+offsetX];
@@ -76,13 +80,15 @@ void calcSurfaceVertices(){
 					vertexData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)  ] = (ix*fraction) + (surfaceSize*anchorX) - 0.5;
 					vertexData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+1] = (iy*fraction) + (surfaceSize*anchorY) - 0.5;
 					vertexData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+2] = tempZ;
+					// cout << "((verticesPerSurface * surfaceIndex) + vIterator) == " << ((verticesPerSurface * surfaceIndex) + vIterator) << "\n";
+					// cout << "(iy*fraction) + (surfaceSize*anchorY) == " << (iy*fraction) + (surfaceSize*anchorX) << "\n";
 
 					normalData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)  ] = (ix*fraction) + (surfaceSize*anchorX) - 0.5;
 					normalData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+1] = (iy*fraction) + (surfaceSize*anchorY) - 0.5;
 					normalData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+2] = tempZ;
-					cout << tempZ << " ";
+					//cout << tempZ << " ";
 				}
-				cout << "\n";
+				//cout << "\n";
 			}
 
 			int fIterator = 0;
@@ -97,6 +103,10 @@ void calcSurfaceVertices(){
 					indexData[6 * ((squaresPerSurface * surfaceIndex) + fIterator) + 3] = (verticesPerSurface * surfaceIndex) + vIterator + 1;
 					indexData[6 * ((squaresPerSurface * surfaceIndex) + fIterator) + 4] = (verticesPerSurface * surfaceIndex) + vIterator + sampleRate;
 					indexData[6 * ((squaresPerSurface * surfaceIndex) + fIterator) + 5] = (verticesPerSurface * surfaceIndex) + vIterator + sampleRate + 1;
+
+					cout << "indexData[6 * ((squaresPerSurface * surfaceIndex) + fIterator) + 5] = " << indexData[6 * ((squaresPerSurface * surfaceIndex) + fIterator) + 5] << "\n"; 
+					// cout << "((squaresPerSurface * surfaceIndex) + fIterator) = " << ((squaresPerSurface * surfaceIndex) + fIterator) << "\n";
+					// cout << "(verticesPerSurface * surfaceIndex) + vIterator = " << (verticesPerSurface * surfaceIndex) + vIterator << "\n";
 				}
 			}
 			++surfaceIndex;
@@ -147,17 +157,12 @@ bool ParseSurface(const string& fileName){
 		}
 
 		GLfloat tempRead_z;
-		GLfloat dGrid = min(1.0/(cPointX-1) , 1.0/(cPointY-1)); // Find the smallest grid step to fit
-		GLfloat comp_y = -0.5;
 		for(int iy = 0; iy < cPointY && getline(myfile, curLine) ; ++iy){
 			stringstream str(curLine);
-			GLfloat comp_x = -0.5;
 			for(int ix = 0; ix < cPointX ; ++ix){
 				str >> tempRead_z;
 				controlPoints[iy][ix] = tempRead_z;
-				comp_x += dGrid;
 			}
-			comp_y += dGrid;
 		}
 
 		PrintControlPoints(cPointY, cPointX, controlPoints); // Preview of the controlPoints
@@ -166,13 +171,10 @@ bool ParseSurface(const string& fileName){
 		for(int iy = 0; iy < 4 ; ++iy){
 			tempControlPoints[iy] = new float[4];
 		}
-
 		myfile.close();
+		return true;
 	}
-	else{
-		return false;
-	}
-	return true;
+	return false;
 }
 
 bool ReadDataFromFile(const string& fileName,string& data){
@@ -280,7 +282,7 @@ void drawModel(){
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(gVertexDataSizeInBytes));
 
-	glDrawElements(GL_TRIANGLES, (sampleRate-1) * (sampleRate-1) * 6 , GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, (sampleRate-1) * (sampleRate-1) * surfaceCount * 6 , GL_UNSIGNED_INT, 0);
 }
 
 void display(){
