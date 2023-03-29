@@ -16,10 +16,6 @@ glm::mat4 viewingMatrix;
 glm::mat4 modelingMatrix;
 glm::vec3 eyePos(0, 0, 2);
 
-vector<Vertex> gVertices;
-vector<Normal> gNormals;
-vector<Face> gFaces;
-
 GLuint gVertexAttribBuffer, gIndexBuffer;
 GLint gInVertexLoc, gInNormalLoc;
 int gVertexDataSizeInBytes, gNormalDataSizeInBytes, indexDataSizeInBytes;
@@ -37,13 +33,19 @@ float **tempControlPoints;
 bool updateSurface = true;
 
 void calcSurfaceVertices(){
-	// do all necessary computations
-	// set the flag back to false
 	if(!updateSurface){return;}
-	gVertices.clear();
-      
-	gNormals.clear();
-	gFaces.clear();
+
+	int vertexEntries = sampleRate * sampleRate * 3;
+	int faceEntries = (sampleRate-1) * (sampleRate-1) * 6;
+	cout << "faceEntries = " << faceEntries << "\n";
+
+	gVertexDataSizeInBytes = vertexEntries * sizeof(GLfloat);
+	gNormalDataSizeInBytes = vertexEntries * sizeof(GLfloat);
+	indexDataSizeInBytes = faceEntries * sizeof(GLuint);
+	GLfloat* vertexData = new GLfloat[vertexEntries];
+	GLfloat* normalData = new GLfloat[vertexEntries];
+	GLuint* indexData = new GLuint[faceEntries];
+	
 	for(int anchorY = 0; anchorY < cPointY/4 ; ++anchorY){
 		for(int anchorX = 0; anchorX < cPointX/4 ; ++anchorX){
 			cout << setprecision(3) << "anchor:(" << anchorY << "," << anchorX << ") | With fraction: " << (1.0/sampleRate) << " \n"; 
@@ -53,44 +55,55 @@ void calcSurfaceVertices(){
 				}
 			}
 			
+			int vIterator = 0;
 			float fraction = 1.0/(sampleRate-1);
 			float tempZ = 0;
-			for(float iy = 0 ; iy < sampleRate; ++iy){
-				for(float ix = 0 ; ix < sampleRate ; ++ix){
+			for(int iy = 0 ; iy < sampleRate; ++iy){
+				for(int ix = 0 ; ix < sampleRate ; ++ix){
+					vIterator = iy*sampleRate+ix;
 					tempZ = calcBezierSurface(fraction*iy, fraction*ix, tempControlPoints);
-					gVertices.push_back(Vertex(fraction*ix-0.5, fraction*iy-0.5, tempZ));
-					gNormals.push_back(Normal(fraction*ix-0.5, fraction*iy-0.5, tempZ));
+					vertexData[3 * vIterator] = ix*fraction - 0.5;
+					vertexData[3 * vIterator + 1] = iy*fraction - 0.5;
+					vertexData[3 * vIterator + 2] = tempZ;
+
+					normalData[3 * vIterator] = ix*fraction- 0.5;
+					normalData[3 * vIterator + 1] = iy*fraction- 0.5;
+					normalData[3 * vIterator + 2] = tempZ;
 					cout << tempZ << " ";
 				}
 				cout << "\n";
 			}
 
-			int vIterator = 0;
-			int vIndex[3], nIndex[3], tIndex[3];
-			for(float iy = 0 ; iy < sampleRate-1; ++iy){
-				for(float ix = 0 ; ix < sampleRate-1 ; ++ix){
+			int fIterator = 0;
+			for(int iy = 0 ; iy < sampleRate-1; ++iy){
+				for(int ix = 0 ; ix < sampleRate-1 ; ++ix){
 					vIterator = iy*sampleRate+ix;
-					vIndex[0] = vIterator;
-					nIndex[0] = vIterator;
-					vIndex[1] = vIterator + sampleRate;
-					nIndex[1] = vIterator + sampleRate;
-					vIndex[2] = vIterator + 1;
-					nIndex[2] = vIterator + 1;
-					gFaces.push_back(Face(vIndex, tIndex, nIndex));
-					vIndex[0] = vIterator + 1;
-					nIndex[0] = vIterator + 1;
-					vIndex[1] = vIterator + sampleRate;
-					nIndex[1] = vIterator + sampleRate;
-					vIndex[2] = vIterator + sampleRate + 1;
-					nIndex[2] = vIterator + sampleRate + 1;
-					gFaces.push_back(Face(vIndex, tIndex, nIndex));
+					fIterator = iy*(sampleRate-1)+ix;
+
+					indexData[6 * fIterator]     = vIterator;
+					indexData[6 * fIterator + 1] = vIterator + sampleRate;
+					indexData[6 * fIterator + 2] = vIterator + 1;
+					indexData[6 * fIterator + 3] = vIterator + 1;
+					indexData[6 * fIterator + 4] = vIterator + sampleRate;
+					indexData[6 * fIterator + 5] = vIterator + sampleRate + 1;
 				}
 			}
 		}
 	}
-	cout << "gVertices.size() = " << gVertices.size() << "\n"; 
-	cout << "gNormals.size() = " << gNormals.size() << "\n"; 
-	cout << "gFaces.size() = " << gFaces.size() << "\n"; 
+
+	glBufferData(GL_ARRAY_BUFFER, gVertexDataSizeInBytes + gNormalDataSizeInBytes, 0, GL_STATIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, gVertexDataSizeInBytes, vertexData);
+	glBufferSubData(GL_ARRAY_BUFFER, gVertexDataSizeInBytes, gNormalDataSizeInBytes, normalData);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexDataSizeInBytes, indexData, GL_STATIC_DRAW);
+
+	// done copying; can free now
+	delete[] vertexData;
+	delete[] normalData;
+	delete[] indexData;
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(gVertexDataSizeInBytes));
+
 	updateSurface = false;
 }
 
@@ -246,51 +259,6 @@ void initVBO(){
 
 	glBindBuffer(GL_ARRAY_BUFFER, gVertexAttribBuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gIndexBuffer);
-
-	gVertexDataSizeInBytes = gVertices.size() * 3 * sizeof(GLfloat);
-	gNormalDataSizeInBytes = gNormals.size() * 3 * sizeof(GLfloat);
-	indexDataSizeInBytes = gFaces.size() * 3 * sizeof(GLuint);
-	GLfloat* vertexData = new GLfloat[gVertices.size() * 3];
-	GLfloat* normalData = new GLfloat[gNormals.size() * 3];
-	GLuint* indexData = new GLuint[gFaces.size() * 3];
-
-	for (int i = 0; i < gVertices.size(); ++i){
-		vertexData[3 * i] = gVertices[i].x;
-		vertexData[3 * i + 1] = gVertices[i].y;
-		vertexData[3 * i + 2] = gVertices[i].z;
-	}
-
-	for (int i = 0; i < gNormals.size(); ++i){
-		normalData[3 * i] = gNormals[i].x;
-		normalData[3 * i + 1] = gNormals[i].y;
-		normalData[3 * i + 2] = gNormals[i].z;
-	}
-
-	for (int i = 0; i < gFaces.size(); ++i){
-		indexData[3 * i] = gFaces[i].vIndex[0];
-		indexData[3 * i + 1] = gFaces[i].vIndex[1];
-		indexData[3 * i + 2] = gFaces[i].vIndex[2];
-	}
-
-
-	glBufferData(GL_ARRAY_BUFFER, gVertexDataSizeInBytes + gNormalDataSizeInBytes, 0, GL_STATIC_DRAW);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, gVertexDataSizeInBytes, vertexData);
-	glBufferSubData(GL_ARRAY_BUFFER, gVertexDataSizeInBytes, gNormalDataSizeInBytes, normalData);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexDataSizeInBytes, indexData, GL_STATIC_DRAW);
-
-	// done copying; can free now
-	delete[] vertexData;
-	delete[] normalData;
-	delete[] indexData;
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(gVertexDataSizeInBytes));
-}
-
-void init(){
-	glEnable(GL_DEPTH_TEST);
-	initShaders();
-	initVBO();
 }
 
 void drawModel(){
@@ -300,7 +268,7 @@ void drawModel(){
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(gVertexDataSizeInBytes));
 
-	glDrawElements(GL_TRIANGLES, gFaces.size() * 3, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, (sampleRate-1) * (sampleRate-1) * 6 , GL_UNSIGNED_INT, 0);
 }
 
 void display(){
@@ -399,7 +367,6 @@ void mainLoop(GLFWwindow* window){
 int main(int argc, char** argv){
 	if(argc != 2){return 1;}
 	ParseSurface(argv[1]);
-	calcSurfaceVertices();
 
 	GLFWwindow* window;
 	if (!glfwInit()){
@@ -431,7 +398,10 @@ int main(int argc, char** argv){
 	strcat(rendererInfo, (const char*)glGetString(GL_VERSION));
 	glfwSetWindowTitle(window, rendererInfo);
 
-	init();
+	glEnable(GL_DEPTH_TEST);
+	initShaders();
+	initVBO();
+	calcSurfaceVertices();
 
 	glfwSetKeyCallback(window, keyboard);
 	glfwSetWindowSizeCallback(window, reshape);
