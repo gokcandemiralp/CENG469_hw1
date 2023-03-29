@@ -35,20 +35,31 @@ bool updateSurface = true;
 void calcSurfaceVertices(){
 	if(!updateSurface){return;}
 
-	int vertexEntries = sampleRate * sampleRate * 3;
-	int faceEntries = (sampleRate-1) * (sampleRate-1) * 6;
-	cout << "faceEntries = " << faceEntries << "\n";
+	int anchorCountY = cPointY/4;
+	int anchorCountX = cPointX/4;
+	int anchorDownScale = max(anchorCountX,anchorCountY);
+	int surfaceCount = anchorCountX * anchorCountY;
+	int surfaceIndex = 0;
+	float surfaceSize = 1.0/anchorDownScale;
 
+	int verticesPerSurface = sampleRate * sampleRate;
+	int squaresPerSurface = (sampleRate-1) * (sampleRate-1);
+
+	int vertexEntries = verticesPerSurface * 3 * surfaceCount;
+	int faceEntries = squaresPerSurface * 6 * surfaceCount;
+	cout << "faceEntries = " << faceEntries << "\n";
+	cout << "surfaceCount = " << surfaceCount << "\n";
+	
 	gVertexDataSizeInBytes = vertexEntries * sizeof(GLfloat);
 	gNormalDataSizeInBytes = vertexEntries * sizeof(GLfloat);
 	indexDataSizeInBytes = faceEntries * sizeof(GLuint);
 	GLfloat* vertexData = new GLfloat[vertexEntries];
 	GLfloat* normalData = new GLfloat[vertexEntries];
 	GLuint* indexData = new GLuint[faceEntries];
-	
-	for(int anchorY = 0; anchorY < cPointY/4 ; ++anchorY){
-		for(int anchorX = 0; anchorX < cPointX/4 ; ++anchorX){
-			cout << setprecision(3) << "anchor:(" << anchorY << "," << anchorX << ") | With fraction: " << (1.0/sampleRate) << " \n"; 
+
+	for(int anchorY = 0; anchorY < anchorCountY ; ++anchorY){
+		for(int anchorX = 0; anchorX < anchorCountX ; ++anchorX){
+			cout << setprecision(3) << "surfaceIndex :(" << surfaceIndex << ") | With fraction: " << 1.0/((sampleRate-1)*anchorDownScale) << " \n"; 
 			for(int offsetY = 0 ; offsetY < 4 ; ++offsetY){
 				for(int offsetX = 0 ; offsetX < 4 ; ++offsetX){
 					tempControlPoints[offsetY][offsetX] = controlPoints[4*anchorY+offsetY][4*anchorX+offsetX];
@@ -56,19 +67,19 @@ void calcSurfaceVertices(){
 			}
 			
 			int vIterator = 0;
-			float fraction = 1.0/(sampleRate-1);
+			float fraction = 1.0/((sampleRate-1)*anchorDownScale);
 			float tempZ = 0;
 			for(int iy = 0 ; iy < sampleRate; ++iy){
 				for(int ix = 0 ; ix < sampleRate ; ++ix){
 					vIterator = iy*sampleRate+ix;
 					tempZ = calcBezierSurface(fraction*iy, fraction*ix, tempControlPoints);
-					vertexData[3 * vIterator] = ix*fraction - 0.5;
-					vertexData[3 * vIterator + 1] = iy*fraction - 0.5;
-					vertexData[3 * vIterator + 2] = tempZ;
+					vertexData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)  ] = (ix*fraction) + (surfaceSize*anchorX) - 0.5;
+					vertexData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+1] = (iy*fraction) + (surfaceSize*anchorY) - 0.5;
+					vertexData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+2] = tempZ;
 
-					normalData[3 * vIterator] = ix*fraction- 0.5;
-					normalData[3 * vIterator + 1] = iy*fraction- 0.5;
-					normalData[3 * vIterator + 2] = tempZ;
+					normalData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)  ] = (ix*fraction) + (surfaceSize*anchorX) - 0.5;
+					normalData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+1] = (iy*fraction) + (surfaceSize*anchorY) - 0.5;
+					normalData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+2] = tempZ;
 					cout << tempZ << " ";
 				}
 				cout << "\n";
@@ -80,14 +91,15 @@ void calcSurfaceVertices(){
 					vIterator = iy*sampleRate+ix;
 					fIterator = iy*(sampleRate-1)+ix;
 
-					indexData[6 * fIterator]     = vIterator;
-					indexData[6 * fIterator + 1] = vIterator + sampleRate;
-					indexData[6 * fIterator + 2] = vIterator + 1;
-					indexData[6 * fIterator + 3] = vIterator + 1;
-					indexData[6 * fIterator + 4] = vIterator + sampleRate;
-					indexData[6 * fIterator + 5] = vIterator + sampleRate + 1;
+					indexData[6 * ((squaresPerSurface * surfaceIndex) + fIterator)    ] = (verticesPerSurface * surfaceIndex) + vIterator;
+					indexData[6 * ((squaresPerSurface * surfaceIndex) + fIterator) + 1] = (verticesPerSurface * surfaceIndex) + vIterator + sampleRate;
+					indexData[6 * ((squaresPerSurface * surfaceIndex) + fIterator) + 2] = (verticesPerSurface * surfaceIndex) + vIterator + 1;
+					indexData[6 * ((squaresPerSurface * surfaceIndex) + fIterator) + 3] = (verticesPerSurface * surfaceIndex) + vIterator + 1;
+					indexData[6 * ((squaresPerSurface * surfaceIndex) + fIterator) + 4] = (verticesPerSurface * surfaceIndex) + vIterator + sampleRate;
+					indexData[6 * ((squaresPerSurface * surfaceIndex) + fIterator) + 5] = (verticesPerSurface * surfaceIndex) + vIterator + sampleRate + 1;
 				}
 			}
+			++surfaceIndex;
 		}
 	}
 
