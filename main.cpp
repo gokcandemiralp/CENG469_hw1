@@ -71,24 +71,23 @@ void calcSurfaceVertices(){
 			}
 			
 			int vIterator = 0;
-			float fraction = 1.0/((sampleRate-1)*anchorDownScale);
+			float step = 1.0/(sampleRate-1);
+			float fraction = step/anchorDownScale;
 			float tempZ = 0;
 			for(int iy = 0 ; iy < sampleRate; ++iy){
 				for(int ix = 0 ; ix < sampleRate ; ++ix){
 					vIterator = iy*sampleRate+ix;
-					tempZ = calcBezierSurface(fraction*iy, fraction*ix, tempControlPoints);
+					tempZ = calcBezierSurface(step*iy, step*ix, tempControlPoints);
 					vertexData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)  ] = (ix*fraction) + (surfaceSize*anchorX) - 0.5;
 					vertexData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+1] = (iy*fraction) + (surfaceSize*anchorY) - 0.5;
 					vertexData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+2] = tempZ;
-					// cout << "((verticesPerSurface * surfaceIndex) + vIterator) == " << ((verticesPerSurface * surfaceIndex) + vIterator) << "\n";
-					// cout << "(iy*fraction) + (surfaceSize*anchorY) == " << (iy*fraction) + (surfaceSize*anchorX) << "\n";
 
 					normalData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)  ] = (ix*fraction) + (surfaceSize*anchorX) - 0.5;
 					normalData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+1] = (iy*fraction) + (surfaceSize*anchorY) - 0.5;
 					normalData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+2] = tempZ;
-					//cout << tempZ << " ";
+					cout << tempZ << " ";
 				}
-				//cout << "\n";
+				cout << "\n";
 			}
 
 			int fIterator = 0;
@@ -103,10 +102,6 @@ void calcSurfaceVertices(){
 					indexData[6 * ((squaresPerSurface * surfaceIndex) + fIterator) + 3] = (verticesPerSurface * surfaceIndex) + vIterator + 1;
 					indexData[6 * ((squaresPerSurface * surfaceIndex) + fIterator) + 4] = (verticesPerSurface * surfaceIndex) + vIterator + sampleRate;
 					indexData[6 * ((squaresPerSurface * surfaceIndex) + fIterator) + 5] = (verticesPerSurface * surfaceIndex) + vIterator + sampleRate + 1;
-
-					cout << "indexData[6 * ((squaresPerSurface * surfaceIndex) + fIterator) + 5] = " << indexData[6 * ((squaresPerSurface * surfaceIndex) + fIterator) + 5] << "\n"; 
-					// cout << "((squaresPerSurface * surfaceIndex) + fIterator) = " << ((squaresPerSurface * surfaceIndex) + fIterator) << "\n";
-					// cout << "(verticesPerSurface * surfaceIndex) + vIterator = " << (verticesPerSurface * surfaceIndex) + vIterator << "\n";
 				}
 			}
 			++surfaceIndex;
@@ -283,6 +278,7 @@ void drawModel(){
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(gVertexDataSizeInBytes));
 
 	glDrawElements(GL_TRIANGLES, (sampleRate-1) * (sampleRate-1) * surfaceCount * 6 , GL_UNSIGNED_INT, 0);
+	glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 }
 
 void display(){
