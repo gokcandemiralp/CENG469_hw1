@@ -20,12 +20,27 @@ float Bernstein(int i, int n, float s){
     return Combination(n,i)*pow((1-s),(n-i))*pow(s,i);
 }
 
+float BernsteinD(int i, int n, float s){
+    return Combination(n,i)*pow((1-s),(n-i))*pow(s,i);
+}
 
-float calcBezierSurface(float s, float t, float **controlPoints){
+float calcBezierSurface(float s, float t, Vertex **controlPoints){
     float ans = 0;
     for(int i = 0 ; i<4 ; ++i){
         for(int j = 0 ; j<4 ; ++j){
-            ans = ans + controlPoints[i][j] * Bernstein(i,3,s) * Bernstein(j,3,t);
+            ans = ans + controlPoints[i][j].z * Bernstein(i,3,s) * Bernstein(j,3,t);
+        }        
+    }
+    return ans;
+}
+
+glm::vec3 calcBezierNormal(float s, float t, Vertex **controlPoints){
+    glm::vec3 ans;
+    for(int i = 0 ; i<3 ; ++i){
+        for(int j = 0 ; j<3 ; ++j){
+            ans.x -= controlPoints[i][j].x-controlPoints[i+1][j+1].x * 9 * Bernstein(i,2,s) * Bernstein(j,2,t);
+            ans.y -= controlPoints[i][j].y-controlPoints[i+1][j+1].y * 9 * Bernstein(i,2,s) * Bernstein(j,2,t);
+            ans.z -= controlPoints[i][j].z-controlPoints[i+1][j+1].z * 9 * Bernstein(i,2,s) * Bernstein(j,2,t);
         }        
     }
     return ans;

@@ -30,7 +30,7 @@ int sampleRate = 10;
 int surfaceCount = 1;
 
 float **controlPoints;
-float **tempControlPoints;
+Vertex **tempControlPoints;
 bool updateSurface = true;
 
 void calcSurfaceVertices(){
@@ -61,7 +61,9 @@ void calcSurfaceVertices(){
 			cout << "anchorY == " << anchorY << " | anchorX == " << anchorX << "\n";
 			for(int offsetY = 0 ; offsetY < 4 ; ++offsetY){
 				for(int offsetX = 0 ; offsetX < 4 ; ++offsetX){
-					tempControlPoints[offsetY][offsetX] = controlPoints[4*anchorY+offsetY][4*anchorX+offsetX];
+					tempControlPoints[offsetY][offsetX].x = (offsetX*(1.0/(3*anchorDownScale))) + (surfaceSize*anchorX) - 0.5;
+					tempControlPoints[offsetY][offsetX].y = (offsetY*(1.0/(3*anchorDownScale))) + (surfaceSize*anchorY) - 0.5;
+					tempControlPoints[offsetY][offsetX].z = controlPoints[4*anchorY+offsetY][4*anchorX+offsetX];
 				}
 			}
 			
@@ -77,12 +79,13 @@ void calcSurfaceVertices(){
 					vertexData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+1] = (iy*fraction) + (surfaceSize*anchorY) - 0.5;
 					vertexData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+2] = tempZ;
 
-					normalData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)  ] = (ix*fraction) + (surfaceSize*anchorX) - 0.5;
-					normalData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+1] = (iy*fraction) + (surfaceSize*anchorY) - 0.5;
-					normalData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+2] = tempZ;
-					cout << tempZ << " ";
+					glm::vec3 normalVector = normalize(calcBezierNormal(step*iy, step*ix,tempControlPoints));
+					normalData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)  ] = normalVector.x;
+					normalData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+1] = normalVector.y;
+					normalData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+2] = normalVector.z;
+					//cout << tempZ << " ";
 				}
-				cout << "\n";
+				// cout << "\n";
 			}
 
 			int fIterator = 0;
@@ -157,9 +160,9 @@ bool ParseSurface(const string& fileName){
 
 		PrintControlPoints(cPointY, cPointX, controlPoints); // Preview of the controlPoints
 
-		tempControlPoints = new float*[4];	// Allocate space for Temp Buffer Control Points
+		tempControlPoints = new Vertex*[4];	// Allocate space for Temp Buffer Control Points
 		for(int iy = 0; iy < 4 ; ++iy){
-			tempControlPoints[iy] = new float[4];
+			tempControlPoints[iy] = new Vertex[4];
 		}
 		myfile.close();
 		return true;
