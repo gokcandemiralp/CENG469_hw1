@@ -49,10 +49,6 @@ void calcSurfaceVertices(){
 	int vertexEntries = verticesPerSurface * 3 * surfaceCount;
 	int faceEntries = squaresPerSurface * 6 * surfaceCount;
 	
-	cout << "surfaceCount = " << surfaceCount << "\n";
-	cout << "faceEntries = " << faceEntries << "\n";
-	cout << "vertexEntries = " << vertexEntries << "\n";
-	
 	gVertexDataSizeInBytes = vertexEntries * sizeof(GLfloat);
 	gNormalDataSizeInBytes = vertexEntries * sizeof(GLfloat);
 	indexDataSizeInBytes = faceEntries * sizeof(GLuint);
@@ -62,7 +58,6 @@ void calcSurfaceVertices(){
 
 	for(int anchorY = 0; anchorY < anchorCountY ; ++anchorY){
 		for(int anchorX = 0; anchorX < anchorCountX ; ++anchorX){
-			cout << setprecision(3) << "surfaceIndex :(" << surfaceIndex << ") | With fraction: " << 1.0/((sampleRate-1)*anchorDownScale) << " \n"; 
 			cout << "anchorY == " << anchorY << " | anchorX == " << anchorX << "\n";
 			for(int offsetY = 0 ; offsetY < 4 ; ++offsetY){
 				for(int offsetX = 0 ; offsetX < 4 ; ++offsetX){
@@ -278,7 +273,6 @@ void drawModel(){
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(gVertexDataSizeInBytes));
 
 	glDrawElements(GL_TRIANGLES, (sampleRate-1) * (sampleRate-1) * surfaceCount * 6 , GL_UNSIGNED_INT, 0);
-	glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 }
 
 void display(){
@@ -363,6 +357,14 @@ void keyboard(GLFWwindow* window, int key, int scancode, int action, int mods)
 	else if (key == GLFW_KEY_F && action == GLFW_PRESS){
 		rotationAngle -= 10;
 		cout << "Key F Pressed | rotationAngle ==  " << rotationAngle << "\n";
+	}
+	else if (key == GLFW_KEY_L && action == GLFW_PRESS){
+		glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+		cout << "Key L Pressed | Wireframe" << "\n";
+	}
+	else if (key == GLFW_KEY_O && action == GLFW_PRESS){
+		glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+		cout << "Key O Pressed | Solid Render" << "\n";
 	}
 }
 
