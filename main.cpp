@@ -30,7 +30,7 @@ int sampleRate = 10;
 int surfaceCount = 1;
 
 float **controlPoints;
-Vertex **tempControlPoints;
+glm::vec3 **tempControlPoints;
 bool updateSurface = true;
 
 void calcSurfaceVertices(){
@@ -79,7 +79,7 @@ void calcSurfaceVertices(){
 					vertexData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+1] = (iy*fraction) + (surfaceSize*anchorY) - 0.5;
 					vertexData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+2] = tempZ;
 
-					glm::vec3 normalVector = normalize(calcBezierNormal(step*iy, step*ix,tempControlPoints));
+					glm::vec3 normalVector = calcBezierNormal(step*iy, step*ix,tempControlPoints);
 					normalData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)  ] = normalVector.x;
 					normalData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+1] = normalVector.y;
 					normalData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+2] = normalVector.z;
@@ -158,11 +158,11 @@ bool ParseSurface(const string& fileName){
 			}
 		}
 
-		PrintControlPoints(cPointY, cPointX, controlPoints); // Preview of the controlPoints
+		// PrintControlPoints(cPointY, cPointX, controlPoints); // Preview of the controlPoints
 
-		tempControlPoints = new Vertex*[4];	// Allocate space for Temp Buffer Control Points
+		tempControlPoints = new glm::vec3*[4];	// Allocate space for Temp Buffer Control Points
 		for(int iy = 0; iy < 4 ; ++iy){
-			tempControlPoints[iy] = new Vertex[4];
+			tempControlPoints[iy] = new glm::vec3[4];
 		}
 		myfile.close();
 		return true;
