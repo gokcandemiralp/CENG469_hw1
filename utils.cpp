@@ -47,14 +47,14 @@ glm::vec3 dUBezier(const float &u, const float &v, glm::vec3 **controlPoints) {
     return ans;
 } 
  
-glm::vec3 dVBezier(const float &u, const float &v, glm::vec3 **controlPoints) { 
+glm::vec3 dVBezier(float u, float v, glm::vec3 **controlPoints) { 
 
     glm::vec3 ans = glm::vec3(0,0,0);
     for(int i = 0 ; i<4 ; ++i ){
-        ans += -3 * (1 - v) * (1 - v) * controlPoints[0][i] * Bernstein(i,3,u) + 
-                (3 * (1 - v) * (1 - v) - 6 * v * (1 - v)) * controlPoints[1][i] * Bernstein(i,3,u) + 
-                (6 * v * (1 - v) - 3 * v * v) * controlPoints[2][i] * Bernstein(i,3,u) + 
-                3 * v * v * controlPoints[3][i] * Bernstein(i,3,u); 
+        ans += -3 * (1 - u) * (1 - u) * controlPoints[0][i] * Bernstein(i,3,v) + 
+                (3 * (1 - u) * (1 - u) - 6 * u * (1 - u)) * controlPoints[1][i] * Bernstein(i,3,v) + 
+                (6 * u * (1 - u) - 3 * u * u) * controlPoints[2][i] * Bernstein(i,3,v) + 
+                3 * u * u * controlPoints[3][i] * Bernstein(i,3,v); 
     }
     return ans;
 } 
