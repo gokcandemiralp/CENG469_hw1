@@ -32,14 +32,17 @@ void main(void){
 	vec3 V = normalize(eyePos - vP);
 	vec3 N = normalize(nWorld);
 	
-	vec3 lightPos, I, L, H;
-	float NdotL, NdotH;
+	vec3 lightPos, I, L, H, fragToLightVec;
+	float NdotL, NdotH, lightToFragDistance, distanceModifier;
 	vec3 diffuseColor  = vec3(0,0,0);
 	vec3 specularColor = vec3(0,0,0);
 	for(int i = 0 ; i<lightCount ; ++i){
 		lightPos = pointLights[i].position;	// light position in world coordinates
-		I = pointLights[i].color;   		// point light intensity
-		L = normalize(lightPos - vec3(fragWorldPos));
+		fragToLightVec = lightPos - vec3(fragWorldPos);
+		L = normalize(fragToLightVec);
+		lightToFragDistance = length(fragToLightVec);
+		distanceModifier = (lightToFragDistance * lightToFragDistance);
+		I = pointLights[i].color/distanceModifier;   		// point light intensity
 		H = normalize(L + V);
 		NdotL = dot(N, L); // for diffuse component
 		NdotH = dot(N, H); // for specular component
