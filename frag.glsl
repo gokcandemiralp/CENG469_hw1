@@ -1,4 +1,4 @@
-#version 460 core
+#version 450 core
 #define MAX_LIGHTS 16
 
 struct PointLight{

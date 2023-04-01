@@ -288,10 +288,9 @@ void display(){
 	calcSurfaceVertices(); // Create vetices according to detail amount and control points
 
 	// Compute the modeling matrix
-	glm::mat4 matT = glm::translate(glm::mat4(1.0), glm::vec3(0.f, 0.f, -2.0f));
 	glm::mat4 matR = glm::rotate(glm::mat4(1.f), glm::radians(rotationAngle), glm::vec3(1, 0, 0));
 	glm::mat4 matS = glm::scale(glm::mat4(1.f), glm::vec3(coordMultiplier,coordMultiplier,coordMultiplier));
-	modelingMatrix = matT * matS * matR;
+	modelingMatrix = matS * matR;
 
 	// Set the active program and the values of its uniform variables
 	glUseProgram(gProgram);
@@ -323,7 +322,7 @@ void reshape(GLFWwindow* window, int w, int h){
 	float fovyRad = (float)(45.0 / 180.0) * M_PI;
 	projectionMatrix = glm::perspective(fovyRad, w/(float) h, 1.0f, 100.0f);
 
-	viewingMatrix = glm::mat4(1);
+	viewingMatrix = glm::lookAt(eyePos,glm::vec3(0,0,0),glm::vec3(0,1,0));
 }
 
 void keyboard(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -388,7 +387,7 @@ int main(int argc, char** argv){
 		exit(-1);
 	}
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	int width = 800, height = 600;
