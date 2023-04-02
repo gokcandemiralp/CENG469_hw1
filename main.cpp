@@ -18,7 +18,7 @@ glm::vec3 eyePos(0, 0, 2);
 
 GLuint gVertexAttribBuffer, gIndexBuffer;
 GLint gInVertexLoc, gInNormalLoc;
-int gVertexDataSizeInBytes, gNormalDataSizeInBytes, indexDataSizeInBytes;
+int gVertexDataSizeInBytes, gNormalDataSizeInBytes, indexDataSizeInBytes, UVdataSizeInBytes, anchorDataSizeInBytes;
 
 GLint lightCount;
 GLint cPointX, cPointY;
@@ -31,6 +31,7 @@ int sampleRate = 10;
 int surfaceCount = 1;
 
 glm::vec3 controlSurfaces[6][6][4][4];
+GLfloat* UVdata;
 bool updateSurface = true;
 
 void calcSurfaceVertices(){
@@ -40,30 +41,39 @@ void calcSurfaceVertices(){
 	int surfaceIndex = 0;
 	float surfaceSize = 1.0/anchorDownScale;
 	surfaceCount = anchorCountX * anchorCountY;
+	int vertexIndex = 0;
 
 	int verticesPerSurface = sampleRate * sampleRate;
 	int squaresPerSurface = (sampleRate-1) * (sampleRate-1);
 
 	int vertexEntries = verticesPerSurface * 3 * surfaceCount;
 	int faceEntries = squaresPerSurface * 6 * surfaceCount;
-	
+	int UVentries = verticesPerSurface * 2 * surfaceCount;
+	int anchorEntries = verticesPerSurface * 2 * surfaceCount;
+
 	gVertexDataSizeInBytes = vertexEntries * sizeof(GLfloat);
 	gNormalDataSizeInBytes = vertexEntries * sizeof(GLfloat);
 	indexDataSizeInBytes = faceEntries * sizeof(GLuint);
+	UVdataSizeInBytes = UVentries * sizeof(GLfloat);
+	anchorDataSizeInBytes = faceEntries * sizeof(GLuint);
+
 	GLfloat* vertexData = new GLfloat[vertexEntries];
 	GLfloat* normalData = new GLfloat[vertexEntries];
 	GLuint* indexData = new GLuint[faceEntries];
+	GLfloat* UVdata = new GLfloat[UVentries];
+	GLuint* anchorData = new GLuint[anchorEntries];
 
 	for(int anchorY = 0; anchorY < anchorCountY ; ++anchorY){
 		for(int anchorX = 0; anchorX < anchorCountX ; ++anchorX){
 			cout << "anchorY == " << anchorY << " | anchorX == " << anchorX << "\n";
-			
 			int vIterator = 0;
 			float step = 1.0/(sampleRate-1);
 			float fraction = step/anchorDownScale;
 			float tempZ = 0;
 			for(int iy = 0 ; iy < sampleRate; ++iy){
 				for(int ix = 0 ; ix < sampleRate ; ++ix){
+					UVdata[2*vertexIndex]     = step*ix	; UVdata[2*vertexIndex + 1]     = step*iy; 
+					anchorData[2*vertexIndex] = anchorX ; anchorData[2*vertexIndex + 1] = anchorY;
 					vIterator = iy*sampleRate+ix;
 					tempZ = calcBezierSurface(step*iy, step*ix, controlSurfaces[anchorY][anchorX]);
 					vertexData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)  ] = (ix*fraction) + (surfaceSize*anchorX) - 0.5;
@@ -74,6 +84,7 @@ void calcSurfaceVertices(){
 					normalData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)  ] = normalVector.x;
 					normalData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+1] = normalVector.y;
 					normalData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+2] = normalVector.z;
+					++vertexIndex;
 					//cout << tempZ << " ";
 				}
 				// cout << "\n";
@@ -106,6 +117,8 @@ void calcSurfaceVertices(){
 	delete[] vertexData;
 	delete[] normalData;
 	delete[] indexData;
+	delete[] UVdata;
+	delete[] anchorData;
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(gVertexDataSizeInBytes));
@@ -260,26 +273,13 @@ void initShaders(){
 	eyePosLoc = glGetUniformLocation(gProgram, "eyePos");
 }
 
-void initVBO(){
-	GLuint vao;
-	glGenVertexArrays(1, &vao);
-	assert(vao > 0);
-	glBindVertexArray(vao);
+void initUnfiorms(){
+	glUseProgram(gProgram);
 
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	assert(glGetError() == GL_NONE);
-
-	glGenBuffers(1, &gVertexAttribBuffer);
-	glGenBuffers(1, &gIndexBuffer);
-
-	assert(gVertexAttribBuffer > 0 && gIndexBuffer > 0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, gVertexAttribBuffer);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gIndexBuffer);
+	glUniform1i(glGetUniformLocation(gProgram, "anchorCountY"), anchorCountY);
+	glUniform1i(glGetUniformLocation(gProgram, "anchorCountY"), anchorCountX);
 
 	string tmp_str;
-	glUseProgram(gProgram);
 	for(int anchorY = 0; anchorY < anchorCountY ; ++anchorY){
 		for(int anchorX = 0; anchorX < anchorCountX ; ++anchorX){
 			cout << "anchorY == " << anchorY << " | anchorX == " << anchorX << "\n";
@@ -299,6 +299,25 @@ void initVBO(){
 			cout << "\n";
 		}
 	}
+}
+
+void initVBO(){
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	assert(vao > 0);
+	glBindVertexArray(vao);
+
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	assert(glGetError() == GL_NONE);
+
+	glGenBuffers(1, &gVertexAttribBuffer);
+	glGenBuffers(1, &gIndexBuffer);
+
+	assert(gVertexAttribBuffer > 0 && gIndexBuffer > 0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, gVertexAttribBuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gIndexBuffer);
 }
 
 void drawModel(){
@@ -330,7 +349,9 @@ void display(){
 	glUniformMatrix4fv(projectionMatrixLoc, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 	glUniformMatrix4fv(viewingMatrixLoc, 1, GL_FALSE, glm::value_ptr(viewingMatrix));
 	glUniformMatrix4fv(modelingMatrixLoc, 1, GL_FALSE, glm::value_ptr(modelingMatrix));
+
 	glUniform3fv(eyePosLoc, 1, glm::value_ptr(eyePos));
+	glUniform1i(glGetUniformLocation(gProgram, "sampleRate"), sampleRate);
 
 	glUniform1i(glGetUniformLocation(gProgram, "lightCount"), lightCount);
 	for(int lightIndex = 0; lightIndex < lightCount ; ++lightIndex){
@@ -447,6 +468,7 @@ int main(int argc, char** argv){
 	glEnable(GL_DEPTH_TEST);
 	initShaders();
 	initVBO();
+	initUnfiorms();
 	calcSurfaceVertices();
 
 	glfwSetKeyCallback(window, keyboard);
