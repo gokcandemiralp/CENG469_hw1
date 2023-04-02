@@ -22,6 +22,7 @@ int gVertexDataSizeInBytes, gNormalDataSizeInBytes, indexDataSizeInBytes;
 
 GLint lightCount;
 GLint cPointX, cPointY;
+int anchorCountY, anchorCountX;
 PointLight *pointLights;
 
 float rotationAngle = -30;
@@ -35,8 +36,6 @@ bool updateSurface = true;
 void calcSurfaceVertices(){
 	if(!updateSurface){return;}
 
-	int anchorCountY = cPointY/4;
-	int anchorCountX = cPointX/4;
 	int anchorDownScale = max(anchorCountX,anchorCountY);
 	int surfaceIndex = 0;
 	float surfaceSize = 1.0/anchorDownScale;
@@ -135,6 +134,8 @@ bool ParseSurface(const string& fileName){
 		getline(myfile, curLine); 	// initial read for the control point matrix
 		stringstream str(curLine);	// initial read for the control point matrix
 		str >> cPointY >> cPointX;	// initial read for the control point matrix
+		anchorCountY = cPointY /4;
+		anchorCountX = cPointX /4;
 
 		float **controlPoints;
 		controlPoints = new float*[cPointY];	// Allocate space for Control Points
@@ -153,8 +154,6 @@ bool ParseSurface(const string& fileName){
 
 		// PrintControlPoints(cPointY, cPointX, controlPoints); // Preview of the controlPoints
 
-		int anchorCountY = cPointY/4;
-		int anchorCountX = cPointX/4;
 		int anchorDownScale = max(anchorCountX,anchorCountY);
 		float surfaceSize = 1.0/anchorDownScale;
 
@@ -278,6 +277,28 @@ void initVBO(){
 
 	glBindBuffer(GL_ARRAY_BUFFER, gVertexAttribBuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gIndexBuffer);
+
+	string tmp_str;
+	glUseProgram(gProgram);
+	for(int anchorY = 0; anchorY < anchorCountY ; ++anchorY){
+		for(int anchorX = 0; anchorX < anchorCountX ; ++anchorX){
+			cout << "anchorY == " << anchorY << " | anchorX == " << anchorX << "\n";
+			for(int offsetY = 0 ; offsetY < 4 ; ++offsetY){
+				for(int offsetX = 0 ; offsetX < 4 ; ++offsetX){
+					tmp_str = "controlSurfaces[" + to_string(anchorY) + "]" + 
+					"[" + to_string(anchorX) + "]"+
+					"[" + to_string(offsetY) + "]"+
+					"[" + to_string(offsetX) + "]";
+
+					glUniform3fv(glGetUniformLocation(gProgram, tmp_str.c_str()), 1, 
+					glm::value_ptr(controlSurfaces[anchorY][anchorX][offsetY][offsetX]));
+					cout << tmp_str.c_str() << " ";
+				}
+				cout << "\n";
+			}
+			cout << "\n";
+		}
+	}
 }
 
 void drawModel(){
@@ -337,8 +358,7 @@ void reshape(GLFWwindow* window, int w, int h){
 	viewingMatrix = glm::lookAt(eyePos,glm::vec3(0,0,0),glm::vec3(0,1,0));
 }
 
-void keyboard(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
+void keyboard(GLFWwindow* window, int key, int scancode, int action, int mods){
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS){
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
 	}

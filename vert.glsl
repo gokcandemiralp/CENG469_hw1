@@ -1,9 +1,10 @@
 #version 450 core
-#define MAX_LIGHTS 16
 
 uniform mat4 modelingMatrix;
 uniform mat4 viewingMatrix;
 uniform mat4 projectionMatrix;
+
+uniform vec3 controlSurfaces[2];
 
 layout(location=0) in vec3 inVertex;
 layout(location=1) in vec3 inNormal;
