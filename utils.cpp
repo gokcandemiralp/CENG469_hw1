@@ -20,10 +20,6 @@ float Bernstein(int i, int n, float s){
     return Combination(n,i)*pow((1-s),(n-i))*pow(s,i);
 }
 
-float BernsteinD(int i, int n, float s){
-    return Combination(n,i)*pow((1-s),(n-i))*pow(s,i);
-}
-
 float calcBezierSurface(float s, float t, glm::vec3 (&controlPoints)[4][4]){
     float ans = 0;
     for(int i = 0 ; i<4 ; ++i){

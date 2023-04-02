@@ -29,7 +29,6 @@ float coordMultiplier = 0.8;
 int sampleRate = 10;
 int surfaceCount = 1;
 
-float **controlPoints;
 glm::vec3 controlSurfaces[6][6][4][4];
 bool updateSurface = true;
 
@@ -137,6 +136,7 @@ bool ParseSurface(const string& fileName){
 		stringstream str(curLine);	// initial read for the control point matrix
 		str >> cPointY >> cPointX;	// initial read for the control point matrix
 
+		float **controlPoints;
 		controlPoints = new float*[cPointY];	// Allocate space for Control Points
 		for(int iy = 0; iy < cPointY ; ++iy){
 			controlPoints[iy] = new float[cPointX];
@@ -170,6 +170,11 @@ bool ParseSurface(const string& fileName){
 				}
 			}
 		}
+
+		for(int iy = 0; iy < cPointY ; ++iy){
+			delete[] controlPoints[iy];
+		}
+		delete[] controlPoints;
 
 		myfile.close();
 		return true;
