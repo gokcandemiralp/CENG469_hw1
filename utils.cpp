@@ -17,6 +17,7 @@ int Combination(int n, int k){
 }
 
 float Bernstein(int i, int n, float s){
+    if((s == 1 && i==3) || (s ==  0 && i == 0)){return 1;}
     return Combination(n,i)*pow((1-s),(n-i))*pow(s,i);
 }
 
