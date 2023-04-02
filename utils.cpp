@@ -24,7 +24,7 @@ float BernsteinD(int i, int n, float s){
     return Combination(n,i)*pow((1-s),(n-i))*pow(s,i);
 }
 
-float calcBezierSurface(float s, float t, glm::vec3 **controlPoints){
+float calcBezierSurface(float s, float t, glm::vec3 (&controlPoints)[4][4]){
     float ans = 0;
     for(int i = 0 ; i<4 ; ++i){
         for(int j = 0 ; j<4 ; ++j){
@@ -35,7 +35,7 @@ float calcBezierSurface(float s, float t, glm::vec3 **controlPoints){
 }
  
 
-glm::vec3 dUBezier(const float &u, const float &v, glm::vec3 **controlPoints) { 
+glm::vec3 dUBezier(const float &u, const float &v, glm::vec3 (&controlPoints)[4][4]) { 
 
     glm::vec3 ans = glm::vec3(0,0,0);
     for(int i = 0 ; i<4 ; ++i ){
@@ -47,7 +47,7 @@ glm::vec3 dUBezier(const float &u, const float &v, glm::vec3 **controlPoints) {
     return ans;
 } 
  
-glm::vec3 dVBezier(float u, float v, glm::vec3 **controlPoints) { 
+glm::vec3 dVBezier(float u, float v, glm::vec3 (&controlPoints)[4][4]) { 
 
     glm::vec3 ans = glm::vec3(0,0,0);
     for(int i = 0 ; i<4 ; ++i ){
@@ -59,7 +59,7 @@ glm::vec3 dVBezier(float u, float v, glm::vec3 **controlPoints) {
     return ans;
 } 
 
-glm::vec3 calcBezierNormal(float u, float v, glm::vec3 **controlPoints){
+glm::vec3 calcBezierNormal(float u, float v, glm::vec3 (&controlPoints)[4][4]){
     glm::vec3 dU = dUBezier(u, v, controlPoints); 
     glm::vec3 dV = dVBezier(u, v, controlPoints);
     return normalize(cross(dU,dV));

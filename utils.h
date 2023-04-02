@@ -63,8 +63,8 @@ struct PointLight{
 
 int Combination(int n, int k);
 float Bernstein(int n, float t);
-float calcBezierSurface(float s, float t, glm::vec3 **controlPoints);
-glm::vec3 calcBezierNormal(float u, float v, glm::vec3 **controlPoints);
+float calcBezierSurface(float s, float t, glm::vec3 (&controlPoints)[4][4]);
+glm::vec3 calcBezierNormal(float u, float v, glm::vec3 (&controlPoints)[4][4]);
 // void PrintControlPoints(int cPointY,int cPointX, float **controlPoints);
 
 #endif

@@ -30,7 +30,7 @@ int sampleRate = 10;
 int surfaceCount = 1;
 
 float **controlPoints;
-glm::vec3 **tempControlPoints;
+glm::vec3 controlSurfaces[6][6][4][4];
 bool updateSurface = true;
 
 void calcSurfaceVertices(){
@@ -59,13 +59,6 @@ void calcSurfaceVertices(){
 	for(int anchorY = 0; anchorY < anchorCountY ; ++anchorY){
 		for(int anchorX = 0; anchorX < anchorCountX ; ++anchorX){
 			cout << "anchorY == " << anchorY << " | anchorX == " << anchorX << "\n";
-			for(int offsetY = 0 ; offsetY < 4 ; ++offsetY){
-				for(int offsetX = 0 ; offsetX < 4 ; ++offsetX){
-					tempControlPoints[offsetY][offsetX].x = (offsetX*(1.0/(3*anchorDownScale))) + (surfaceSize*anchorX) - 0.5;
-					tempControlPoints[offsetY][offsetX].y = (offsetY*(1.0/(3*anchorDownScale))) + (surfaceSize*anchorY) - 0.5;
-					tempControlPoints[offsetY][offsetX].z = controlPoints[4*anchorY+offsetY][4*anchorX+offsetX];
-				}
-			}
 			
 			int vIterator = 0;
 			float step = 1.0/(sampleRate-1);
@@ -74,12 +67,12 @@ void calcSurfaceVertices(){
 			for(int iy = 0 ; iy < sampleRate; ++iy){
 				for(int ix = 0 ; ix < sampleRate ; ++ix){
 					vIterator = iy*sampleRate+ix;
-					tempZ = calcBezierSurface(step*iy, step*ix, tempControlPoints);
+					tempZ = calcBezierSurface(step*iy, step*ix, controlSurfaces[anchorY][anchorX]);
 					vertexData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)  ] = (ix*fraction) + (surfaceSize*anchorX) - 0.5;
 					vertexData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+1] = (iy*fraction) + (surfaceSize*anchorY) - 0.5;
 					vertexData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+2] = tempZ;
 
-					glm::vec3 normalVector = calcBezierNormal(step*iy, step*ix,tempControlPoints);
+					glm::vec3 normalVector = calcBezierNormal(step*iy, step*ix, controlSurfaces[anchorY][anchorX]);
 					normalData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)  ] = normalVector.x;
 					normalData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+1] = normalVector.y;
 					normalData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+2] = normalVector.z;
@@ -160,10 +153,24 @@ bool ParseSurface(const string& fileName){
 
 		// PrintControlPoints(cPointY, cPointX, controlPoints); // Preview of the controlPoints
 
-		tempControlPoints = new glm::vec3*[4];	// Allocate space for Temp Buffer Control Points
-		for(int iy = 0; iy < 4 ; ++iy){
-			tempControlPoints[iy] = new glm::vec3[4];
+		int anchorCountY = cPointY/4;
+		int anchorCountX = cPointX/4;
+		int anchorDownScale = max(anchorCountX,anchorCountY);
+		float surfaceSize = 1.0/anchorDownScale;
+
+		for(int anchorY = 0; anchorY < anchorCountY ; ++anchorY){
+			for(int anchorX = 0; anchorX < anchorCountX ; ++anchorX){
+				cout << "anchorY == " << anchorY << " | anchorX == " << anchorX << "\n";
+				for(int offsetY = 0 ; offsetY < 4 ; ++offsetY){
+					for(int offsetX = 0 ; offsetX < 4 ; ++offsetX){
+						controlSurfaces[anchorY][anchorX][offsetY][offsetX].x = (offsetX*(1.0/(3*anchorDownScale))) + (surfaceSize*anchorX) - 0.5;
+						controlSurfaces[anchorY][anchorX][offsetY][offsetX].y = (offsetY*(1.0/(3*anchorDownScale))) + (surfaceSize*anchorY) - 0.5;
+						controlSurfaces[anchorY][anchorX][offsetY][offsetX].z = controlPoints[4*anchorY+offsetY][4*anchorX+offsetX];
+					}
+				}
+			}
 		}
+
 		myfile.close();
 		return true;
 	}
