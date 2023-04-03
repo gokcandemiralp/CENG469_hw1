@@ -47,17 +47,45 @@ float calcBezierSurface(){
     return ans;
 }
 
+vec3 dVBezier() { 
+    vec3 ans = vec3(0,0,0);
+    for(int i = 0 ; i<4 ; ++i ){
+        ans += -3 * (1 - v) * (1 - v) * controlPoints[i][0] * Bernstein(i,3,u) + 
+                (3 * (1 - v) * (1 - v) - 6 * v * (1 - v)) * controlPoints[i][1] * Bernstein(i,3,u) + 
+                (6 * v * (1 - v) - 3 * v * v) * controlPoints[i][2] * Bernstein(i,3,u) + 
+                3 * v * v * controlPoints[i][3] * Bernstein(i,3,u); 
+    }
+    return ans;
+} 
+ 
+vec3 dUBezier() { 
+    vec3 ans = vec3(0,0,0);
+    for(int i = 0 ; i<4 ; ++i ){
+        ans += -3 * (1 - u) * (1 - u) * controlPoints[0][i] * Bernstein(i,3,v) + 
+                (3 * (1 - u) * (1 - u) - 6 * u * (1 - u)) * controlPoints[1][i] * Bernstein(i,3,v) + 
+                (6 * u * (1 - u) - 3 * u * u) * controlPoints[2][i] * Bernstein(i,3,v) + 
+                3 * u * u * controlPoints[3][i] * Bernstein(i,3,v); 
+    }
+    return ans;
+} 
+
+vec3 calcBezierNormal(){
+    vec3 dU = dUBezier(); 
+    vec3 dV = dVBezier();
+    return normalize(cross(dV,dU));
+}
+
 void main(void){
     float tempZ = 0;
     int anchorDownScale = max(anchorCountX,anchorCountY);
     float step = 1.0/(sampleRate-1);
     float fraction = step/anchorDownScale;
     float surfaceSize = 1.0/anchorDownScale;
-
     controlPoints = controlSurfaces[0][0];
+
     tempZ = calcBezierSurface();
+    Normal = calcBezierNormal();
     // glm::vec3 normalVector = calcBezierNormal(step*iy, step*ix, controlSurfaces[anchorY][anchorX]);
-    //Normal = inNormal;
     vec4 modelPosition = vec4(u/anchorDownScale + (surfaceSize*inAnchor.x) - 0.5 , v/anchorDownScale + (surfaceSize*inAnchor.y)- 0.5 , tempZ, 1);
     fragWorldPos = projectionMatrix * viewingMatrix * modelingMatrix * modelPosition;
     gl_Position = projectionMatrix * viewingMatrix * modelingMatrix * modelPosition;
