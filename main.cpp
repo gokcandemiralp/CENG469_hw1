@@ -1,4 +1,4 @@
-#include "utils.h" 
+#include "main.h" 
 #define BUFFER_OFFSET(i) ((char*)NULL + (i))
 
 
@@ -147,8 +147,6 @@ bool ParseSurface(const string& fileName){
 				controlPoints[iy][ix] = tempRead_z;
 			}
 		}
-
-		// PrintControlPoints(cPointY, cPointX, controlPoints); // Preview of the controlPoints
 
 		int anchorDownScale = max(anchorCountX,anchorCountY);
 		float surfaceSize = 1.0/anchorDownScale;
