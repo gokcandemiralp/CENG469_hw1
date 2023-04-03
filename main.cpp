@@ -18,7 +18,7 @@ glm::vec3 eyePos(0, 0, 2);
 
 GLuint gVertexAttribBuffer, gIndexBuffer;
 GLint gInVertexLoc, gInNormalLoc;
-int gVertexDataSizeInBytes, gNormalDataSizeInBytes, indexDataSizeInBytes, UVdataSizeInBytes, anchorDataSizeInBytes;
+int indexDataSizeInBytes, UVdataSizeInBytes, anchorDataSizeInBytes;
 
 GLint lightCount;
 GLint cPointX, cPointY;
@@ -46,19 +46,14 @@ void calcSurfaceVertices(){
 	int verticesPerSurface = sampleRate * sampleRate;
 	int squaresPerSurface = (sampleRate-1) * (sampleRate-1);
 
-	int vertexEntries = verticesPerSurface * 3 * surfaceCount;
 	int faceEntries = squaresPerSurface * 6 * surfaceCount;
 	int UVentries = verticesPerSurface * 2 * surfaceCount;
 	int anchorEntries = verticesPerSurface * 2 * surfaceCount;
 
-	gVertexDataSizeInBytes = vertexEntries * sizeof(GLfloat);
-	gNormalDataSizeInBytes = vertexEntries * sizeof(GLfloat);
 	indexDataSizeInBytes = faceEntries * sizeof(GLuint);
 	UVdataSizeInBytes = UVentries * sizeof(GLfloat);
 	anchorDataSizeInBytes = faceEntries * sizeof(GLuint);
 
-	GLfloat* vertexData = new GLfloat[vertexEntries];
-	GLfloat* normalData = new GLfloat[vertexEntries];
 	GLuint* indexData = new GLuint[faceEntries];
 	GLfloat* UVdata = new GLfloat[UVentries];
 	GLuint* anchorData = new GLuint[anchorEntries];
@@ -75,15 +70,8 @@ void calcSurfaceVertices(){
 					UVdata[2*vertexIndex]     = step*ix	; UVdata[2*vertexIndex + 1]     = step*iy; 
 					anchorData[2*vertexIndex] = anchorX ; anchorData[2*vertexIndex + 1] = anchorY;
 					vIterator = iy*sampleRate+ix;
-					tempZ = calcBezierSurface(step*iy, step*ix, controlSurfaces[anchorY][anchorX]);
-					vertexData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)  ] = (ix*fraction) + (surfaceSize*anchorX) - 0.5;
-					vertexData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+1] = (iy*fraction) + (surfaceSize*anchorY) - 0.5;
-					vertexData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+2] = tempZ;
-
-					glm::vec3 normalVector = calcBezierNormal(step*iy, step*ix, controlSurfaces[anchorY][anchorX]);
-					normalData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)  ] = normalVector.x;
-					normalData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+1] = normalVector.y;
-					normalData[3 * ((verticesPerSurface * surfaceIndex) + vIterator)+2] = normalVector.z;
+					// tempZ = calcBezierSurface(step*iy, step*ix, controlSurfaces[anchorY][anchorX]);
+					// glm::vec3 normalVector = calcBezierNormal(step*iy, step*ix, controlSurfaces[anchorY][anchorX]);
 					++vertexIndex;
 					//cout << tempZ << " ";
 				}
@@ -108,20 +96,18 @@ void calcSurfaceVertices(){
 		}
 	}
 
-	glBufferData(GL_ARRAY_BUFFER, gVertexDataSizeInBytes + gNormalDataSizeInBytes, 0, GL_STATIC_DRAW);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, gVertexDataSizeInBytes, vertexData);
-	glBufferSubData(GL_ARRAY_BUFFER, gVertexDataSizeInBytes, gNormalDataSizeInBytes, normalData);
+	glBufferData(GL_ARRAY_BUFFER, UVdataSizeInBytes + anchorDataSizeInBytes, 0, GL_STATIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, UVdataSizeInBytes, UVdata);
+	glBufferSubData(GL_ARRAY_BUFFER, UVdataSizeInBytes, anchorDataSizeInBytes, anchorData);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexDataSizeInBytes, indexData, GL_STATIC_DRAW);
 
 	// done copying; can free now
-	delete[] vertexData;
-	delete[] normalData;
 	delete[] indexData;
 	delete[] UVdata;
 	delete[] anchorData;
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(gVertexDataSizeInBytes));
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(UVdataSizeInBytes));
 
 	updateSurface = false;
 }
@@ -324,8 +310,8 @@ void drawModel(){
 	glBindBuffer(GL_ARRAY_BUFFER, gVertexAttribBuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gIndexBuffer);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(gVertexDataSizeInBytes));
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(UVdataSizeInBytes));
 
 	glDrawElements(GL_TRIANGLES, (sampleRate-1) * (sampleRate-1) * surfaceCount * 6 , GL_UNSIGNED_INT, 0);
 }

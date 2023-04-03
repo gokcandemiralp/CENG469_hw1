@@ -9,8 +9,8 @@ uniform int anchorCountY;
 uniform int anchorCountX;
 uniform int sampleRate;
 
-layout(location=0) in vec3 inVertex;
-layout(location=1) in vec3 inNormal;
+layout(location=0) in vec2 inUV;
+layout(location=1) in vec2 inAnchor;
 
 out vec4 fragWorldPos;
 out vec3 Normal;
@@ -21,8 +21,8 @@ void main(void){
     float step = 1.0/(sampleRate-1);
     float fraction = step/anchorDownScale;
 
-    Normal = inNormal;
-    fragWorldPos = projectionMatrix * viewingMatrix * modelingMatrix * vec4(inVertex, 1);
-    gl_Position = projectionMatrix * viewingMatrix * modelingMatrix * vec4(inVertex, 1);
+    //Normal = inNormal;
+    fragWorldPos = projectionMatrix * viewingMatrix * modelingMatrix * vec4(inUV.x - 0.5 , inUV.y - 0.5 , 0, 1);
+    gl_Position = projectionMatrix * viewingMatrix * modelingMatrix * vec4(inUV.x - 0.5 , inUV.y - 0.5 , 0, 1);
 }
 
