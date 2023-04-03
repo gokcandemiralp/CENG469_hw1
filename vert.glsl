@@ -83,7 +83,7 @@ void main(void){
     float step = 1.0/(sampleRate-1);
     float fraction = step/anchorDownScale;
     float surfaceSize = 1.0/anchorDownScale;
-    controlPoints = controlSurfaces[anchorX][anchorY];
+    controlPoints = controlSurfaces[anchorY][anchorX];
 
     tempZ = calcBezierSurface();
     Normal = calcBezierNormal();

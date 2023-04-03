@@ -41,7 +41,6 @@ void calcSurfaceVertices(){
 	int surfaceIndex = 0;
 	float surfaceSize = 1.0/anchorDownScale;
 	surfaceCount = anchorCountX * anchorCountY;
-	int vertexIndex = 0;
 
 	int verticesPerSurface = sampleRate * sampleRate;
 	int squaresPerSurface = (sampleRate-1) * (sampleRate-1);
@@ -54,21 +53,28 @@ void calcSurfaceVertices(){
 	UVdataSizeInBytes = UVentries * sizeof(GLfloat);
 	anchorDataSizeInBytes = anchorEntries * sizeof(GLfloat);
 
+	glBindBuffer(GL_ARRAY_BUFFER, gVertexAttribBuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gIndexBuffer);
+
 	GLuint* indexData = new GLuint[faceEntries];
 	GLfloat* UVdata = new GLfloat[UVentries];
 	GLfloat* anchorData = new GLfloat[anchorEntries];
 
+	// cout << "faceEntries" << faceEntries << "\n";
+	// cout << "UVentries" << UVentries << "\n";
+	// cout << "anchorEntries" << anchorEntries << "\n";
+
 	for(int anchorY = 0; anchorY < anchorCountY ; ++anchorY){
 		for(int anchorX = 0; anchorX < anchorCountX ; ++anchorX){
+			cout << "anchorY == " << anchorY << " | anchorX == " << anchorX << "\n";
 			float step = 1.0/(sampleRate-1);
 			float fraction = step/anchorDownScale;
 			float tempZ = 0;
-			int vIterator = 0;
+			int vIterator = surfaceIndex * sampleRate * sampleRate;
 			for(int iy = 0 ; iy < sampleRate; ++iy){
 				for(int ix = 0 ; ix < sampleRate ; ++ix){
 					UVdata[2*vIterator]     = step*ix	; UVdata[2*vIterator + 1]     = step*iy; 
 					anchorData[2*vIterator] = anchorX   ; anchorData[2*vIterator + 1] = anchorY;
-					cout << "anchorY == " << anchorY << " | anchorX == " << anchorX << "\n";
 					++vIterator;
 					//cout << tempZ << " ";
 				}
@@ -103,7 +109,7 @@ void calcSurfaceVertices(){
 	delete[] UVdata;
 	delete[] anchorData;
 
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(UVdataSizeInBytes));
 
 	updateSurface = false;
@@ -304,7 +310,7 @@ void drawModel(){
 	glBindBuffer(GL_ARRAY_BUFFER, gVertexAttribBuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gIndexBuffer);
 
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(UVdataSizeInBytes));
 
 	glDrawElements(GL_TRIANGLES, (sampleRate-1) * (sampleRate-1) * surfaceCount * 6 , GL_UNSIGNED_INT, 0);
