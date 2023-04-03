@@ -78,15 +78,16 @@ vec3 calcBezierNormal(){
 void main(void){
     float tempZ = 0;
     int anchorDownScale = max(anchorCountX,anchorCountY);
+    int anchorX = int(inAnchor.x);
+    int anchorY = int(inAnchor.y);
     float step = 1.0/(sampleRate-1);
     float fraction = step/anchorDownScale;
     float surfaceSize = 1.0/anchorDownScale;
-    controlPoints = controlSurfaces[0][0];
+    controlPoints = controlSurfaces[anchorX][anchorY];
 
     tempZ = calcBezierSurface();
     Normal = calcBezierNormal();
-    // glm::vec3 normalVector = calcBezierNormal(step*iy, step*ix, controlSurfaces[anchorY][anchorX]);
-    vec4 modelPosition = vec4(u/anchorDownScale + (surfaceSize*inAnchor.x) - 0.5 , v/anchorDownScale + (surfaceSize*inAnchor.y)- 0.5 , tempZ, 1);
+    vec4 modelPosition = vec4(u/anchorDownScale + (surfaceSize*anchorX) - 0.5 , v/anchorDownScale + (surfaceSize*anchorY)- 0.5 , tempZ, 1);
     fragWorldPos = projectionMatrix * viewingMatrix * modelingMatrix * modelPosition;
     gl_Position = projectionMatrix * viewingMatrix * modelingMatrix * modelPosition;
 }

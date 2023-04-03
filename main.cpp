@@ -424,7 +424,7 @@ int main(int argc, char** argv){
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	int width = 800, height = 600;
-	window = glfwCreateWindow(width, height, "Simple Example", NULL, NULL);
+	window = glfwCreateWindow(width, height, "CENG469-HW1", NULL, NULL);
 
 	if (!window){
 		glfwTerminate();
