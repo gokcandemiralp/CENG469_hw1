@@ -50,10 +50,10 @@ float calcBezierSurface(){
 vec3 dVBezier() { 
     vec3 ans = vec3(0,0,0);
     for(int i = 0 ; i<4 ; ++i ){
-        ans += -3 * (1 - v) * (1 - v) * controlPoints[i][0] * Bernstein(i,3,u) + 
-                (3 * (1 - v) * (1 - v) - 6 * v * (1 - v)) * controlPoints[i][1] * Bernstein(i,3,u) + 
-                (6 * v * (1 - v) - 3 * v * v) * controlPoints[i][2] * Bernstein(i,3,u) + 
-                3 * v * v * controlPoints[i][3] * Bernstein(i,3,u); 
+        ans += -3 * (1 - v) * (1 - v) * controlPoints[0][i] * Bernstein(i,3,u) + 
+                (3 * (1 - v) * (1 - v) - 6 * v * (1 - v)) * controlPoints[1][i] * Bernstein(i,3,u) + 
+                (6 * v * (1 - v) - 3 * v * v) * controlPoints[2][i] * Bernstein(i,3,u) + 
+                3 * v * v * controlPoints[3][i] * Bernstein(i,3,u); 
     }
     return ans;
 } 
@@ -61,10 +61,10 @@ vec3 dVBezier() {
 vec3 dUBezier() { 
     vec3 ans = vec3(0,0,0);
     for(int i = 0 ; i<4 ; ++i ){
-        ans += -3 * (1 - u) * (1 - u) * controlPoints[0][i] * Bernstein(i,3,v) + 
-                (3 * (1 - u) * (1 - u) - 6 * u * (1 - u)) * controlPoints[1][i] * Bernstein(i,3,v) + 
-                (6 * u * (1 - u) - 3 * u * u) * controlPoints[2][i] * Bernstein(i,3,v) + 
-                3 * u * u * controlPoints[3][i] * Bernstein(i,3,v); 
+        ans += -3 * (1 - u) * (1 - u) * controlPoints[i][0] * Bernstein(i,3,v) + 
+                (3 * (1 - u) * (1 - u) - 6 * u * (1 - u)) * controlPoints[i][1] * Bernstein(i,3,v) + 
+                (6 * u * (1 - u) - 3 * u * u) * controlPoints[i][2] * Bernstein(i,3,v) + 
+                3 * u * u * controlPoints[i][3] * Bernstein(i,3,v); 
     }
     return ans;
 } 
@@ -72,7 +72,7 @@ vec3 dUBezier() {
 vec3 calcBezierNormal(){
     vec3 dU = dUBezier(); 
     vec3 dV = dVBezier();
-    return normalize(cross(dV,dU));
+    return normalize(cross(dU,dV));
 }
 
 void main(void){
