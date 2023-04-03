@@ -52,27 +52,24 @@ void calcSurfaceVertices(){
 
 	indexDataSizeInBytes = faceEntries * sizeof(GLuint);
 	UVdataSizeInBytes = UVentries * sizeof(GLfloat);
-	anchorDataSizeInBytes = faceEntries * sizeof(GLuint);
+	anchorDataSizeInBytes = anchorEntries * sizeof(GLfloat);
 
 	GLuint* indexData = new GLuint[faceEntries];
 	GLfloat* UVdata = new GLfloat[UVentries];
-	GLuint* anchorData = new GLuint[anchorEntries];
+	GLfloat* anchorData = new GLfloat[anchorEntries];
 
 	for(int anchorY = 0; anchorY < anchorCountY ; ++anchorY){
 		for(int anchorX = 0; anchorX < anchorCountX ; ++anchorX){
-			cout << "anchorY == " << anchorY << " | anchorX == " << anchorX << "\n";
-			int vIterator = 0;
 			float step = 1.0/(sampleRate-1);
 			float fraction = step/anchorDownScale;
 			float tempZ = 0;
+			int vIterator = 0;
 			for(int iy = 0 ; iy < sampleRate; ++iy){
 				for(int ix = 0 ; ix < sampleRate ; ++ix){
-					UVdata[2*vertexIndex]     = step*ix	; UVdata[2*vertexIndex + 1]     = step*iy; 
-					anchorData[2*vertexIndex] = anchorX ; anchorData[2*vertexIndex + 1] = anchorY;
-					vIterator = iy*sampleRate+ix;
-					// tempZ = calcBezierSurface(step*iy, step*ix, controlSurfaces[anchorY][anchorX]);
-					// glm::vec3 normalVector = calcBezierNormal(step*iy, step*ix, controlSurfaces[anchorY][anchorX]);
-					++vertexIndex;
+					UVdata[2*vIterator]     = step*ix	; UVdata[2*vIterator + 1]     = step*iy; 
+					anchorData[2*vIterator] = anchorX   ; anchorData[2*vIterator + 1] = anchorY;
+					cout << "anchorY == " << anchorY << " | anchorX == " << anchorX << "\n";
+					++vIterator;
 					//cout << tempZ << " ";
 				}
 				// cout << "\n";
@@ -158,7 +155,6 @@ bool ParseSurface(const string& fileName){
 
 		for(int anchorY = 0; anchorY < anchorCountY ; ++anchorY){
 			for(int anchorX = 0; anchorX < anchorCountX ; ++anchorX){
-				cout << "anchorY == " << anchorY << " | anchorX == " << anchorX << "\n";
 				for(int offsetY = 0 ; offsetY < 4 ; ++offsetY){
 					for(int offsetX = 0 ; offsetX < 4 ; ++offsetX){
 						controlSurfaces[anchorY][anchorX][offsetY][offsetX].x = (offsetX*(1.0/(3*anchorDownScale))) + (surfaceSize*anchorX) - 0.5;
