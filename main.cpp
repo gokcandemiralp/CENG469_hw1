@@ -34,6 +34,9 @@ glm::vec3 controlSurfaces[6][6][4][4];
 GLfloat* UVdata;
 bool updateSurface = true;
 
+ double lastTime = glfwGetTime();
+ int nbFrames = 0;
+
 void calcSurfaceVertices(){
 	if(!updateSurface){return;}
 
@@ -66,7 +69,7 @@ void calcSurfaceVertices(){
 
 	for(int anchorY = 0; anchorY < anchorCountY ; ++anchorY){
 		for(int anchorX = 0; anchorX < anchorCountX ; ++anchorX){
-			cout << "anchorY == " << anchorY << " | anchorX == " << anchorX << "\n";
+			// cout << "anchorY == " << anchorY << " | anchorX == " << anchorX << "\n";
 			float step = 1.0/(sampleRate-1);
 			float fraction = step/anchorDownScale;
 			float tempZ = 0;
@@ -268,7 +271,7 @@ void initUnfiorms(){
 	string tmp_str;
 	for(int anchorY = 0; anchorY < anchorCountY ; ++anchorY){
 		for(int anchorX = 0; anchorX < anchorCountX ; ++anchorX){
-			cout << "anchorY == " << anchorY << " | anchorX == " << anchorX << "\n";
+			// cout << "anchorY == " << anchorY << " | anchorX == " << anchorX << "\n";
 			for(int offsetY = 0 ; offsetY < 4 ; ++offsetY){
 				for(int offsetX = 0 ; offsetX < 4 ; ++offsetX){
 					tmp_str = "controlSurfaces[" + to_string(anchorY) + "]" + 
@@ -278,11 +281,11 @@ void initUnfiorms(){
 
 					glUniform3fv(glGetUniformLocation(gProgram, tmp_str.c_str()), 1, 
 					glm::value_ptr(controlSurfaces[anchorY][anchorX][offsetY][offsetX]));
-					cout << tmp_str.c_str() << " ";
+					// cout << tmp_str.c_str() << " ";
 				}
-				cout << "\n";
+				// cout << "\n";
 			}
-			cout << "\n";
+			// cout << "\n";
 		}
 	}
 }
@@ -314,6 +317,15 @@ void drawModel(){
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(UVdataSizeInBytes));
 
 	glDrawElements(GL_TRIANGLES, (sampleRate-1) * (sampleRate-1) * surfaceCount * 6 , GL_UNSIGNED_INT, 0);
+
+     double currentTime = glfwGetTime();
+     nbFrames++;
+     if ( currentTime - lastTime >= 0.5 ){ // If last prinf() was more than 1 sec ago
+         // printf and reset timer
+         printf("%f frames per second\n", 2*double(nbFrames));
+         nbFrames = 0;
+         lastTime += 1.0;
+     }
 }
 
 void display(){
